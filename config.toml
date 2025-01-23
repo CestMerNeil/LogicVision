@@ -1,0 +1,12 @@
+# config.toml
+
+[OneFormer_Extractor]
+processor = "shi-labs/oneformer_ade20k_swin_large"
+model = "shi-labs/oneformer_ade20k_swin_large"
+conf_threshold = 0.01
+mask_threshold = 0.01
+task_inputs = "panoptic"
+
+[YOLO_Extractor]
+model_path = "pretrained/yolo11n-seg.pt"
+conf_threshold = 0.01
