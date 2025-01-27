@@ -13,8 +13,14 @@ pprint.pprint(f"Config List: {config}")
 
 class OneFormer_Extractor:
     def __init__(self):
-        self.processor = OneFormerProcessor.from_pretrained(config['OneFormer_Extractor']['processor'])
-        self.model = OneFormerForUniversalSegmentation.from_pretrained(config['OneFormer_Extractor']['model'])
+        self.processor = OneFormerProcessor.from_pretrained(
+            config['OneFormer_Extractor']['processor'],
+            # cache_dir=config['OneFormer_Extractor']['cache_dir']
+        )
+        self.model = OneFormerForUniversalSegmentation.from_pretrained(
+            config['OneFormer_Extractor']['model'],
+            # cache_dir=config['OneFormer_Extractor']['cache_dir']
+        )
 
         self.conf_threshold = config['OneFormer_Extractor']['conf_threshold']
         self.mask_threshold = config['OneFormer_Extractor']['mask_threshold']
@@ -38,12 +44,12 @@ class OneFormer_Extractor:
         Args:
             image (torch.Tensor): Image of shape [3, H, W]
         Returns:
-            Dict[str, torch.Tensor]: 处理后的结果
+            Dict[str, torch.Tensor]
         """
         pil_image = self._to_pil(image)
         inputs = self.processor(
             images=pil_image,
-            task_inputs=[config['OneFormer_Extractor']['task_inputs']],  # "panoptic"
+            task_inputs=[config['OneFormer_Extractor']['task_inputs']],
             return_tensors="pt"
         )
         outputs = self.model(**inputs)
@@ -57,7 +63,7 @@ class OneFormer_Extractor:
         Args:
             images (torch.Tensor): (B, 3, H, W)
         Returns:
-            Dict[str, torch.Tensor]: 对齐后的批量结果
+            Dict[str, torch.Tensor]
         """
         B, C, H, W = images.shape
         pil_images = [self._to_pil(images[i]) for i in range(B)]
@@ -188,13 +194,13 @@ class OneFormer_Extractor:
         classes = torch.stack([d["class_id"] for d in instance_data])
 
         return {
-            "masks": masks,
             "boxes": boxes,
             "centers": centers,
             "widths": widths,
             "heights": heights,
             "scores": scores,
             "classes": classes,
+            "masks": masks,
             "num_objects": len(instance_data)
         }
 
@@ -228,11 +234,16 @@ if __name__ == "__main__":
     print(f"\nTesting single image prediction for {single_image_path}...")
 
     single_image_tensor = torch.rand(3, 640, 640)
+    #single_image_tensor = Image.open(single_image_path)
     single_output = extractor.predict(single_image_tensor)
     print("Single image prediction result keys:")
     for key, value in single_output.items():
         shape_str = value.shape if isinstance(value, torch.Tensor) else value
         print(f"  {key}: {shape_str}")
+        if key == "classes":
+            class_names = [extractor.labels[int(cls)] for cls in value if cls < extractor.num_classes]
+            print(f"    Class IDs: {value.tolist()}")
+            print(f"    Class Names: {class_names}")
 
     batch_images = torch.rand(4, 3, 640, 640)
     print("\nTesting batch image prediction...")
@@ -240,3 +251,14 @@ if __name__ == "__main__":
     print("Batch prediction result keys:")
     for key, value in batch_output.items():
         print(f"  {key}: {value.shape if isinstance(value, torch.Tensor) else value}")
+        if key == "classes":
+            for i in range(batch_output["classes"].shape[0]):
+                class_ids = batch_output["classes"][i].tolist()
+                class_names = [
+                    extractor.labels[int(cls)]
+                    for cls in class_ids
+                    if cls < extractor.num_classes
+                ]
+                print(f"    Image {i + 1}:")
+                print(f"      Class IDs: {class_ids}")
+                print(f"      Class Names: {class_names}")

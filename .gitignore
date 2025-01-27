@@ -1,6 +1,9 @@
 # Mac OS
 .DS_Store
 
+# Dataset
+/data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -175,3 +178,4 @@ cython_debug/
 
 # Pretrained Model
 *.pt
+/cache_pretrained/
