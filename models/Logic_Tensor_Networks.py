@@ -41,10 +41,10 @@ class Logic_Tensor_Networks:
                 hidden_dims=self.mlp_hidden_dims,
                 dropout=self.mlp_dropout
             ),
-            'TopOf': self._build_cnn(
-                input_dim=ltn_config["cnn_input_dim"],
-                channels=self.cnn_channels
-            )
+            #'TopOf': self._build_cnn(
+            #    input_dim=ltn_config["cnn_input_dim"],
+            #    channels=self.cnn_channels
+            #)
         })
         
         # 存储原始检测结果

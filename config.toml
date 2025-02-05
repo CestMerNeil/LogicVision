@@ -2,7 +2,15 @@
 # In this project, we use this TOML file for all the configurations.
 [DataLoader]
 data_root = "data/VOCdevkit/VOC2012"
+openimages_dir = "/Volumes/T7_Shield/Datasets"
 batch_size = 64
+img_size = 640
+num_workers = 0
+
+[OpenImages]
+images_dir = "data/OpenImagesV7/images"
+annotations_file = "data/OpenImagesV7/relationships.csv"
+batch_size = 16
 img_size = 640
 num_workers = 0
 
@@ -14,11 +22,6 @@ epochs = 50
 grad_clip = 5.0
 output_dir = "results/trained_models"
 save_interval = 5
-
-bbox_weight = 1.0
-
-cls_weight = 1.0
-seg_weight = 0.5
 
 [Logic_Tensor_Networks]
 mlp_input_dim = 24
