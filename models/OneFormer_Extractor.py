@@ -2,7 +2,7 @@ import torch
 import pprint
 import tomllib
 from PIL import Image
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from transformers import OneFormerProcessor, OneFormerForUniversalSegmentation
 
@@ -30,7 +30,7 @@ class OneFormer_Extractor:
 
     def extractor_summary(self):
         """
-        Print the summary of the OneFormer Extractor
+        Print the summary of the OneFormer Extractor.
         """
         print(f"Processor: {self.processor}")
         print(f"Model: {self.model}")
@@ -38,86 +38,28 @@ class OneFormer_Extractor:
         print(f"Number of Classes: {self.num_classes}")
 
     @torch.no_grad()
-    def predict(self, image: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def predict(self, image: Image.Image) -> Dict[str, torch.Tensor]:
         """
-        Predict the image using the OneFormer model.
+        Predict the objects in a single image using the OneFormer model.
+        The input is in PIL Image format.
+        
         Args:
-            image (torch.Tensor): Image of shape [3, H, W]
+            image (PIL.Image.Image): The input image.
+        
         Returns:
-            Dict[str, torch.Tensor]
+            Dict[str, torch.Tensor]: A dictionary containing the detection results:
+                "boxes", "centers", "widths", "heights", "scores", "classes", "masks", "num_objects"
         """
-        pil_image = self._to_pil(image)
+        # Directly use the input PIL Image without conversion.
         inputs = self.processor(
-            images=pil_image,
+            images=image,
             task_inputs=[config['OneFormer_Extractor']['task_inputs']],
             return_tensors="pt"
         )
         outputs = self.model(**inputs)
 
-        return self._process_result(outputs, image_size=image.shape[1:])
-
-    @torch.no_grad()
-    def predict_batch(self, images: torch.Tensor) -> Dict[str, torch.Tensor]:
-        """
-        Predict the images using the OneFormer model and align the results for batch processing.
-        Args:
-            images (torch.Tensor): (B, 3, H, W)
-        Returns:
-            Dict[str, torch.Tensor]
-        """
-        B, C, H, W = images.shape
-        pil_images = [self._to_pil(images[i]) for i in range(B)]
-
-        inputs = self.processor(
-            images=pil_images,
-            task_inputs=[config['OneFormer_Extractor']['task_inputs']] * B,
-            return_tensors="pt"
-        )
-        outputs = self.model(**inputs)
-
-        processed_list = self.processor.post_process_panoptic_segmentation(
-            outputs,
-            threshold=self.conf_threshold,
-            mask_threshold=self.mask_threshold,
-            target_sizes=[(H, W)] * B
-        )
-
-        batch_results = []
-        max_num_objs = 0
-        for i in range(B):
-            single_res = self._panoptic_to_instance(
-                processed_list[i]["segmentation"],
-                processed_list[i]["segments_info"]
-            )
-            batch_results.append(single_res)
-            if single_res["num_objects"] > max_num_objs:
-                max_num_objs = single_res["num_objects"]
-
-        aligned_results = {
-            "boxes": torch.zeros(B, max_num_objs, 4),
-            "centers": torch.zeros(B, max_num_objs, 2),
-            "widths": torch.zeros(B, max_num_objs),
-            "heights": torch.zeros(B, max_num_objs),
-            "scores": torch.zeros(B, max_num_objs),
-            "classes": torch.zeros(B, max_num_objs),
-            "masks": torch.zeros(B, max_num_objs, H, W),
-            "num_objects": torch.zeros(B, dtype=torch.long),
-            "image_size": torch.tensor([H, W], dtype=torch.long),
-        }
-
-        for i, res in enumerate(batch_results):
-            n_i = res["num_objects"]
-            aligned_results["num_objects"][i] = n_i
-            if n_i > 0:
-                aligned_results["masks"][i, :n_i] = res["masks"]
-                aligned_results["boxes"][i, :n_i] = res["boxes"]
-                aligned_results["centers"][i, :n_i] = res["centers"]
-                aligned_results["widths"][i, :n_i] = res["widths"]
-                aligned_results["heights"][i, :n_i] = res["heights"]
-                aligned_results["scores"][i, :n_i] = res["scores"]
-                aligned_results["classes"][i, :n_i] = res["classes"]
-
-        return aligned_results
+        # PIL Image size is (width, height); reverse it to (height, width)
+        return self._process_result(outputs, image_size=image.size[::-1])
 
     def _process_result(self, outputs, image_size: tuple) -> Dict[str, torch.Tensor]:
         H, W = image_size
@@ -131,9 +73,8 @@ class OneFormer_Extractor:
         panoptic_seg = processed["segmentation"]
         segments_info = processed["segments_info"]
 
+        # Return a dictionary containing only the detected object information.
         instance_res = self._panoptic_to_instance(panoptic_seg, segments_info)
-
-        instance_res["image_size"] = torch.tensor([H, W], dtype=torch.long)
         return instance_res
 
     def _panoptic_to_instance(self, panoptic_seg: torch.Tensor, segments_info: List[dict]) -> Dict[str, torch.Tensor]:
@@ -144,7 +85,6 @@ class OneFormer_Extractor:
             score = seg.get("score", 1.0)
 
             mask = (panoptic_seg == seg_id).float()
-
             coords = mask.nonzero()
             if coords.numel() == 0:
                 bbox = torch.zeros(4, dtype=torch.float32)
@@ -175,13 +115,13 @@ class OneFormer_Extractor:
 
         if len(instance_data) == 0:
             return {
-                "masks": torch.zeros((0, *panoptic_seg.shape), dtype=torch.float32),
                 "boxes": torch.zeros((0, 4), dtype=torch.float32),
                 "centers": torch.zeros((0, 2), dtype=torch.float32),
                 "widths": torch.zeros((0,), dtype=torch.float32),
                 "heights": torch.zeros((0,), dtype=torch.float32),
                 "scores": torch.zeros((0,), dtype=torch.float32),
                 "classes": torch.zeros((0,), dtype=torch.long),
+                "masks": torch.zeros((0, *panoptic_seg.shape), dtype=torch.float32),
                 "num_objects": 0
             }
 
@@ -204,24 +144,8 @@ class OneFormer_Extractor:
             "num_objects": len(instance_data)
         }
 
-    def _to_pil(self, tensor: torch.Tensor) -> Image.Image:
-        """
-        Convert the tensor to PIL Image
-        Args:
-            tensor (torch.Tensor): Image tensor
-        Returns:
-            Image: PIL Image
-        """
-        tensor = tensor.detach().cpu()
-        if tensor.max() <= 1.0:
-            tensor = tensor * 255
-        arr = tensor.byte().numpy().transpose(1, 2, 0)
-        return Image.fromarray(arr)
-
-
 if __name__ == "__main__":
     import os
-    import torch
 
     extractor = OneFormer_Extractor()
     print("Initialized OneFormer Extractor.")
@@ -233,9 +157,9 @@ if __name__ == "__main__":
 
     print(f"\nTesting single image prediction for {single_image_path}...")
 
-    single_image_tensor = torch.rand(3, 640, 640)
-    #single_image_tensor = Image.open(single_image_path)
-    single_output = extractor.predict(single_image_tensor)
+    # Directly use a PIL Image as input.
+    pil_image = Image.open(single_image_path).convert("RGB")
+    single_output = extractor.predict(pil_image)
     print("Single image prediction result keys:")
     for key, value in single_output.items():
         shape_str = value.shape if isinstance(value, torch.Tensor) else value
@@ -244,21 +168,3 @@ if __name__ == "__main__":
             class_names = [extractor.labels[int(cls)] for cls in value if cls < extractor.num_classes]
             print(f"    Class IDs: {value.tolist()}")
             print(f"    Class Names: {class_names}")
-
-    batch_images = torch.rand(4, 3, 640, 640)
-    print("\nTesting batch image prediction...")
-    batch_output = extractor.predict_batch(batch_images)
-    print("Batch prediction result keys:")
-    for key, value in batch_output.items():
-        print(f"  {key}: {value.shape if isinstance(value, torch.Tensor) else value}")
-        if key == "classes":
-            for i in range(batch_output["classes"].shape[0]):
-                class_ids = batch_output["classes"][i].tolist()
-                class_names = [
-                    extractor.labels[int(cls)]
-                    for cls in class_ids
-                    if cls < extractor.num_classes
-                ]
-                print(f"    Image {i + 1}:")
-                print(f"      Class IDs: {class_ids}")
-                print(f"      Class Names: {class_names}")
