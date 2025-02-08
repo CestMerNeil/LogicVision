@@ -2,224 +2,159 @@ import torch
 import torch.nn as nn
 import ltn
 import tomllib
+# from utils.NetworkBuilder import _build_cnn, _build_mlp
+from Relationship_Predicate import In, On, NextTo, OnTopOf, Near, Under
 
 with open("config.toml", "rb") as f:
     config = tomllib.load(f)
 ltn_config = config["Logic_Tensor_Networks"]
 
 class Logic_Tensor_Networks:
-    def __init__(self, detector_output: dict, label_mapping: dict):
-        """
-        :param detector_output: 检测器输出字典 {
-            'boxes': Tensor[batch, max_objs, 4],
-            'classes': Tensor[batch, max_objs],
-            'masks': Tensor[batch, max_objs, H, W],
-            'scores': Tensor[batch, max_objs],
-            ...其他字段
-        }
-        :param label_mapping: 标签字典 {0: 'background', 1: 'cup', ...}
-        """
-        # 初始化元数据
-        self.label_mapping = label_mapping
-        self.reverse_label = {v:k for k,v in label_mapping.items()}
-        self.feat_dim = self._calculate_feature_dim(label_mapping)
+    def __init__(self, detector_output: dict, input_dim: int, class_labels: list):
+        self.detector_output = detector_output
+        self.class_labels = class_labels
 
-        self.mlp_hidden_dims = ltn_config["mlp_hidden_dims"]
-        self.mlp_dropout = ltn_config["mlp_dropout"]
-        self.cnn_channels = ltn_config["cnn_channels"]
-        self.cnn_unflatten = ltn_config["cnn_unflatten"]
-        self.conv_kernel_size = ltn_config["conv_kernel_size"]
-        self.pool_size = ltn_config["pool_size"]
-        
-        # 第一阶段：对象特征嵌入
-        self.objects = self._process_detector_output(detector_output)
-        
-        # 第二阶段：构建关系网络
-        self.predicates = nn.ModuleDict({
-            'Near': self._build_mlp(
-                input_dim=ltn_config["mlp_input_dim"],
-                hidden_dims=self.mlp_hidden_dims,
-                dropout=self.mlp_dropout
-            ),
-            #'TopOf': self._build_cnn(
-            #    input_dim=ltn_config["cnn_input_dim"],
-            #    channels=self.cnn_channels
-            #)
-        })
-        
-        # 存储原始检测结果
-        self.raw_data = detector_output
+        self.variables = self._variable_builder(detector_output)
 
-    def _process_detector_output(self, data: dict) -> ltn.Constant:
-        # 检查输入数据有效性
-        required_keys = ['boxes', 'classes', 'masks', 'scores']
-        if not all(k in data for k in required_keys):
-            return ltn.Constant(torch.zeros(0, self.feat_dim))
-        
-        batch_size, max_objs = data['boxes'].shape[:2]
-        obj_features = []
-        
-        for b in range(batch_size):
-            batch_features = []
-            for o in range(max_objs):
-                # 跳过无效对象（class=0）
-                if data['classes'][b,o].item() == 0:
-                    continue
-                    
-                # 提取特征并拼接
-                features = [
-                    data['boxes'][b,o],
-                    data['scores'][b,o].view(1),
-                    self._encode_class(data['classes'][b,o].item()),
-                    self._encode_mask(data['masks'][b,o])
+        self.in_predicate = ltn.Predicate(In(input_dim))
+        self.on_predicate = ltn.Predicate(On(input_dim))
+        self.next_to_predicate = ltn.Predicate(NextTo(input_dim))
+        self.on_top_of_predicate = ltn.Predicate(OnTopOf(input_dim))
+        self.near_predicate = ltn.Predicate(Near(input_dim))
+        self.under_predicate = ltn.Predicate(Under(input_dim))
+
+        self.And = ltn.Connective(ltn.fuzzy_ops.And_Min())
+        self.Implies = ltn.Connective(ltn.fuzzy_ops.ImpliesReichenbach())
+        self.Forall = ltn.Quantifier(ltn.fuzzy_ops.AggregMin(), quantifier="f")
+
+    def _variable_builder(self, detector_output: dict):
+        variables = {}
+        for key, value in detector_output.items():
+            if key == "masks":
+                continue
+            if isinstance(value, list):
+                tensors = [
+                    torch.tensor(item) if not isinstance(item, torch.Tensor) else item
                 ]
-                batch_features.append(torch.cat(features))
-            
-            if batch_features:
-                obj_features.append(torch.stack(batch_features))
+                concatenated = torch.stack(tensors, dim=0)
             else:
-                obj_features.append(torch.zeros(0, self.feat_dim))
+                concatenated = value if isinstance(value, torch.Tensor) else torch.tensor(value)
+
+            variables[key] = ltn.Variable(concatenated)
+        print("Variables:")
+        print(variables)
+        return variables
+
+    def train_predicate(self, predicate: str, train_data: dict, epochs: int, batch_size: int, lr: float):
+        if predicate.lower() == "in":
+            predicate = self.in_predicate
+        elif predicate.lower() == "on":
+            predicate = self.on_predicate
+        elif predicate.lower() == "next_to":
+            predicate = self.next_to_predicate
+        elif predicate.lower() == "on_top_of":
+            predicate = self.on_top_of_predicate
+        elif predicate.lower() == "near":
+            predicate = self.near_predicate
+        elif predicate.lower() == "under":
+            predicate = self.under_predicate
+        else:
+            raise ValueError(f"Invalid predicate: {predicate}")
+
+        # 使用内置 BCE 损失函数
+        loss_fn = nn.BCELoss()
+
+        # 优化器只更新该谓词网络的参数
+        optimizer = torch.optim.Adam(pred_net.module.parameters(), lr=lr)
+
+        pos_subj = train_data["pos"]["subject_features"]
+        pos_obj  = train_data["pos"]["object_features"]
+        neg_subj = train_data["neg"]["subject_features"]
+        neg_obj  = train_data["neg"]["object_features"]
+
+        N_pos = pos_subj.shape[0]
+        N_neg = neg_subj.shape[0]
+
+        for epoch in range(epochs):
+            epoch_loss = 0.0
+            num_batches = max((N_pos + batch_size - 1) // batch_size, (N_neg + batch_size - 1) // batch_size)
+            pos_perm = torch.randperm(N_pos)
+            neg_perm = torch.randperm(N_neg)
+
+            for i in range(num_batches):
+                # 划分正样本 mini-batch
+                pos_start = i * batch_size
+                pos_end = min((i+1) * batch_size, N_pos)
+                if pos_start >= N_pos:
+                    pos_batch_subj = torch.empty(0, pos_subj.shape[1])
+                    pos_batch_obj  = torch.empty(0, pos_obj.shape[1])
+                else:
+                    pos_indices = pos_perm[pos_start:pos_end]
+                    pos_batch_subj = pos_subj[pos_indices]
+                    pos_batch_obj  = pos_obj[pos_indices]
+
+                # 划分负样本 mini-batch
+                neg_start = i * batch_size
+                neg_end = min((i+1) * batch_size, N_neg)
+                if neg_start >= N_neg:
+                    neg_batch_subj = torch.empty(0, neg_subj.shape[1])
+                    neg_batch_obj  = torch.empty(0, neg_obj.shape[1])
+                else:
+                    neg_indices = neg_perm[neg_start:neg_end]
+                    neg_batch_subj = neg_subj[neg_indices]
+                    neg_batch_obj  = neg_obj[neg_indices]
+
+                # 前向传播：计算正样本和负样本的关系得分
+                if pos_batch_subj.shape[0] > 0:
+                    pos_score = pred_net(pos_batch_subj, pos_batch_obj)  # 输出形状 [B_pos, 1]
+                else:
+                    pos_score = torch.tensor([]).to(pos_subj.device)
+
+                if neg_batch_subj.shape[0] > 0:
+                    neg_score = pred_net(neg_batch_subj, neg_batch_obj)  # 输出形状 [B_neg, 1]
+                else:
+                    neg_score = torch.tensor([]).to(neg_subj.device)
+
+                # 构造目标标签
+                if pos_score.numel() > 0:
+                    pos_labels = torch.ones_like(pos_score)
+                    loss_pos = loss_fn(pos_score, pos_labels)
+                else:
+                    loss_pos = 0.0
+
+                if neg_score.numel() > 0:
+                    neg_labels = torch.zeros_like(neg_score)
+                    loss_neg = loss_fn(neg_score, neg_labels)
+                else:
+                    loss_neg = 0.0
+
+                loss = loss_pos + loss_neg
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                epoch_loss += loss.item()
+
+            avg_loss = epoch_loss / num_batches
+            if (epoch + 1) % 10 == 0 or epoch == 0:
+                print(f"Epoch {epoch+1}/{epochs} for predicate '{predicate_name}', Loss: {avg_loss:.4f}")
+
+    def inference(self, subject: str, object: str, predicate: str):
+        if predicate.lower() == "in":
+            predicate = self.in_predicate
+        elif predicate.lower() == "on":
+            predicate = self.on_predicate
+        elif predicate.lower() == "next_to":
+            predicate = self.next_to_predicate
+        elif predicate.lower() == "on_top_of":
+            predicate = self.on_top_of_predicate
+        elif predicate.lower() == "near":
+            predicate = self.near_predicate
+        elif predicate.lower() == "under":
+            predicate = self.under_predicate
+        else:
+            raise ValueError(f"Invalid predicate: {predicate}")
         
-        # 处理全空批次的情况
-        if not obj_features:
-            return ltn.Constant(torch.zeros(0, self.feat_dim))
-        
-        return ltn.Constant(torch.stack(obj_features))
-    
-    def _calculate_feature_dim(self, label_mapping: dict) -> int:
-        """动态计算特征总维度"""
-        test_class = 1  # 非零的有效类别
-        test_mask = torch.rand(64, 64)  # 假设掩码尺寸
-        
-        # 计算各部分维度
-        box_dim = 4
-        score_dim = 1
-        class_dim = len(self._encode_class(test_class))
-        mask_dim = len(self._encode_mask(test_mask))
-        
-        return box_dim + score_dim + class_dim + mask_dim
-
-    def _encode_class(self, class_id: int) -> torch.Tensor:
-        """修正后的类别编码"""
-        return torch.nn.functional.one_hot(
-            torch.tensor(class_id).long(),  # 确保为整数类型
-            num_classes=len(self.label_mapping)
-        ).float()
-
-    def _encode_mask(self, mask: torch.Tensor) -> torch.Tensor:
-        """简化掩码编码"""
-        return torch.cat([
-            mask.flatten().float().mean().view(1),  # 平均像素值
-            mask.flatten().std().view(1)            # 像素标准差
-        ])
-
-    def query(self, relation: str, subject: str, obj: str, threshold=None) -> list:
-
-        if threshold is None:
-            threshold = ltn_config["default_threshold"]
-
-        subj_id = self.reverse_label[subject]
-        obj_id = self.reverse_label[obj]
-        
-        results = []
-        for b in range(self.raw_data['classes'].shape[0]):
-            valid_mask = self.raw_data['classes'][b] != 0
-            obj_indices = torch.where(valid_mask)[0].tolist()
-            
-            candidates = [
-                (i,j) for i in obj_indices 
-                for j in obj_indices 
-                if i != j and
-                self.raw_data['classes'][b,i] == subj_id and
-                self.raw_data['classes'][b,j] == obj_id
-            ]
-            
-            if candidates:
-                pair_features = torch.stack([
-                    torch.cat([self.objects.value[b,i], self.objects.value[b,j]]) 
-                    for i,j in candidates
-                ])
-                
-                # 关键修改：确保输出维度正确
-                scores = self.predicates[relation](pair_features).view(-1)
-                
-                valid_pairs = [
-                    (candidates[i], score.item()) 
-                    for i, score in enumerate(scores) 
-                    if score > threshold
-                ]
-            else:
-                valid_pairs = []
-            
-            results.append({
-                "batch": b,
-                "pairs": valid_pairs,
-                "metadata": {
-                    "image_size": self.raw_data['image_size'][b].tolist(),
-                    "num_objects": valid_mask.sum().item()
-                }
-            })
-        
-        return results
-
-    # 神经网络构建工具方法
-    @staticmethod
-    def _build_mlp(input_dim, hidden_dims, dropout):
-        layers = []
-        for h_dim in hidden_dims:
-            layers += [
-                nn.Linear(input_dim, h_dim),
-                nn.ReLU(),
-                nn.Dropout(dropout)
-            ]
-            input_dim = h_dim
-        layers.append(nn.Linear(hidden_dims[-1], 1))
-        layers.append(nn.Sigmoid())
-        return nn.Sequential(*layers)
-
-    @staticmethod
-    def _build_cnn(self, input_dim, channels):
-        return nn.Sequential(
-            nn.Linear(input_dim, 64),
-            nn.Unflatten(1, self.cnn_unflatten),
-            nn.Conv2d(1, channels[0], self.conv_kernel_size, padding=1),
-            nn.MaxPool2d(self.pool_size),
-            nn.Conv2d(channels[0], channels[1], self.conv_kernel_size),
-            nn.AdaptiveAvgPool2d(1),
-            nn.Flatten(),
-            nn.Linear(channels[1], 1),
-            nn.Sigmoid()
-        )
-
-if __name__ == "__main__":
-    # 示例用法
-    # 假设从检测器获取的输出（模拟YOLO输出）
-    detector_data = {
-        'boxes': torch.rand(2, 10, 4),          # 2 batches, 10 objects
-        'classes': torch.tensor([
-            [1,2,3,0,0,0,0,0,0,0], 
-            [2,2,1,4,0,0,0,0,0,0]
-        ]),      # 类别ID
-        'masks': torch.rand(2, 10, 640, 640),   # 掩码
-        'scores': torch.rand(2, 10),            # 置信度
-        'image_size': torch.tensor([[640,640], [640,640]])
-    }
-    
-    labels = {
-        0: 'background',
-        1: 'cup',
-        2: 'bottle',
-        3: 'table',
-        4: 'chair'
-    }
-
-    # 初始化LTN
-    ltn_engine = Logic_Tensor_Networks(detector_data, labels)
-    
-    # 执行查询
-    print("Query results:", ltn_engine.query(
-        relation="Near",
-        subject="cup",
-        obj="table",
-        threshold=0.6
-    ))
+if __name__ == __main__():
+    pass

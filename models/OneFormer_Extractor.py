@@ -168,3 +168,15 @@ if __name__ == "__main__":
             class_names = [extractor.labels[int(cls)] for cls in value if cls < extractor.num_classes]
             print(f"    Class IDs: {value.tolist()}")
             print(f"    Class Names: {class_names}")
+
+    # Single image prediction result keys:
+    # boxes: torch.Size([14, 4])
+    # centers: torch.Size([14, 2])
+    # widths: torch.Size([14])
+    # heights: torch.Size([14])
+    # scores: torch.Size([14])
+    # classes: torch.Size([14])
+    #   Class IDs: [83, 4, 20, 20, 6, 20, 43, 43, 43, 32, 32, 20, 20, 2]
+    #   Class Names: ['truck', 'tree', 'car', 'car', 'road, route', 'car', 'signboard, sign', 'signboard, sign', 'signboard, sign', 'fence', 'fence', 'car', 'car', 'sky']
+    # masks: torch.Size([14, 3024, 4032])
+    # num_objects: 14
