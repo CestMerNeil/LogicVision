@@ -47,8 +47,8 @@ def main():
     input_dim = 5 # center2d, width, height, class
     ltn_network = Logic_Tensor_Networks(detector_output, input_dim, class_labels)
 
-    epochs = 10000
-    batch_size = 512
+    epochs = 1000
+    batch_size = 2048
     lr = 0.01
     ltn_network.train_predicate(
         pos_predicate, 

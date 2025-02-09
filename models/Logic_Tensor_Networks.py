@@ -6,31 +6,52 @@ from models.Relationship_Predicate import In, On, NextTo, OnTopOf, Near, Under
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
-# Load configuration
-with open("config.toml", "rb") as f:
-    config = tomllib.load(f)
-ltn_config = config["Logic_Tensor_Networks"]
+def auto_select_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
 
 class Logic_Tensor_Networks:
-    def __init__(self, detector_output: dict, input_dim: int, class_labels: list):
+    def __init__(self, detector_output: dict, input_dim: int, class_labels: list, device: torch.device = None):
         """
         Initializes the Logic Tensor Networks with the given detector output and configuration.
         The expected detector_output keys are "centers", "widths", "heights", and "classes".
         The input_dim should be 5 (center_x, center_y, width, height, class).
         """
-        self.detector_output = detector_output
+        if device is None:
+            device = auto_select_device()
+        self.device = device
+        print(f"Using device: {self.device}")
+
+        processed_detector_output = {}
+        for key, value in detector_output.items():
+            if isinstance(value, torch.Tensor):
+                processed_detector_output[key] = value.to(self.device)
+            elif isinstance(value, list):
+                tensor_list = [
+                    torch.tensor(item, dtype=torch.float, device=self.device)
+                    if not isinstance(item, torch.Tensor) else item.to(self.device)
+                    for item in value
+                ]
+                processed_detector_output[key] = torch.stack(tensor_list, dim=0)
+            else:
+                processed_detector_output[key] = value
+        self.detector_output = processed_detector_output
         self.class_labels = class_labels
 
         # Build LTN variables from the detector output
-        self.variables = self._variable_builder(detector_output)
+        self.variables = self._variable_builder(self.detector_output)
 
         # Initialize relationship predicate networks
-        self.in_predicate       = ltn.Predicate(In(input_dim))
-        self.on_predicate       = ltn.Predicate(On(input_dim))
-        self.next_to_predicate  = ltn.Predicate(NextTo(input_dim))
-        self.on_top_of_predicate = ltn.Predicate(OnTopOf(input_dim))
-        self.near_predicate     = ltn.Predicate(Near(input_dim))
-        self.under_predicate    = ltn.Predicate(Under(input_dim))
+        self.in_predicate        = ltn.Predicate(In(input_dim)).to(self.device)
+        self.on_predicate        = ltn.Predicate(On(input_dim)).to(self.device)
+        self.next_to_predicate   = ltn.Predicate(NextTo(input_dim)).to(self.device)
+        self.on_top_of_predicate = ltn.Predicate(OnTopOf(input_dim)).to(self.device)
+        self.near_predicate      = ltn.Predicate(Near(input_dim)).to(self.device)
+        self.under_predicate     = ltn.Predicate(Under(input_dim)).to(self.device)
 
         # Initialize logical connectives and quantifiers
         self.And     = ltn.Connective(ltn.fuzzy_ops.AndMin())
@@ -49,11 +70,14 @@ class Logic_Tensor_Networks:
                 raise ValueError(f"Missing key '{key}' in detector_output.")
             value = detector_output[key]
             if isinstance(value, list):
-                tensor = [torch.tensor(item, dtype=torch.float) if not isinstance(item, torch.Tensor) 
-                          else item.float() for item in value]
+                tensor = [
+                    torch.tensor(item, dtype=torch.float, device=self.device)
+                    if not isinstance(item, torch.Tensor) else item.to(self.device)
+                    for item in value
+                ]
                 concatenated = torch.stack(tensor, dim=0)
             else:
-                concatenated = value if isinstance(value, torch.Tensor) else torch.tensor(value, dtype=torch.float)
+                concatenated = value if isinstance(value, torch.Tensor) else torch.tensor(value, dtype=torch.float, device=self.device)
             if key in ["centers", "widths", "heights"] and concatenated.dim() == 1:
                 concatenated = concatenated.unsqueeze(1)
             variables[key] = ltn.Variable(key, concatenated)
@@ -99,13 +123,13 @@ class Logic_Tensor_Networks:
             num_batches = 0
             for batch in tqdm(data_loader, desc=f"Epoch {epoch+1}/{epochs}", leave=False):
                 subj_features, obj_features, labels = batch
-                labels = labels.view(-1, 1).float()
+                subj_features = subj_features.to(self.device)
+                obj_features = obj_features.to(self.device)
+                labels = labels.view(-1, 1).float().to(self.device)
 
-                # Wrap the inputs as LTN Variables using Variable (or Variable if needed)
-                subj_obj = ltn.Variable("subj", subj_features)  # shape: [16,5]
+                subj_obj = ltn.Variable("subj", subj_features)  # shape: [batch_size, 5]
                 obj_obj = ltn.Variable("obj", obj_features)
 
-                # Call the predicate network with a tuple of LTN objects
                 outputs = pred_net(subj_obj, obj_obj).value.diag().unsqueeze(1)
                 loss = loss_fn(outputs, labels)
 
@@ -171,27 +195,17 @@ class Logic_Tensor_Networks:
 
     def _build_features(self, mask: torch.Tensor) -> torch.Tensor:
         """从掩码构建特征矩阵"""
-        return torch.cat([
+        features = torch.cat([
             self.detector_output["centers"][mask],
             self.detector_output["widths"][mask].unsqueeze(1),
             self.detector_output["heights"][mask].unsqueeze(1),
             self.detector_output["classes"][mask].unsqueeze(1).float()
         ], dim=1)
-
-    def _eval_predicate(self, subj: torch.Tensor, obj: torch.Tensor, predicate: str) -> float:
-        """单对对象关系评估"""
-        return self.inference(
-            subj.unsqueeze(0), 
-            obj.unsqueeze(0), 
-            predicate
-        ).item()
+        return features.to(self.device)
 
 if __name__ == "__main__":
     # Example usage in train.py
     import json
-
-    with open("sample_dataset.json", "r") as f:
-        raw_data = json.load(f)
 
     pos_predicate = "ON"
     neg_predicates = ["wears", "has", "next to", "on top of", "in", "behind", "holding", "parked on", "by"]
@@ -199,23 +213,28 @@ if __name__ == "__main__":
     # Assume RelationshipDataset is defined in utils/DataLoader.py
     from utils.DataLoader import RelationshipDataset
 
-    train_dataset = RelationshipDataset(data=raw_data, pos_predicate=pos_predicate, neg_predicates=neg_predicates)
+    train_dataset = RelationshipDataset(
+        relationships_json_path="data/relationships.json",
+        image_meta_json_path="data/image_data.json",
+        pos_predicate=pos_predicate, 
+        neg_predicates=neg_predicates
+    )
 
-    # Create a simulated detector_output (only required keys)
+    # 创建一个模拟的 detector_output（仅包含必须的键）
     num_obj = 10
+    device = auto_select_device()
     detector_output = {
-        "centers": torch.randn(num_obj, 2),
-        "widths": torch.randn(num_obj),
-        "heights": torch.randn(num_obj),
-        "classes": torch.randint(0, 100, (num_obj,))
+        "centers": torch.randn(num_obj, 2, device=device),
+        "widths": torch.randn(num_obj, device=device),
+        "heights": torch.randn(num_obj, device=device),
+        "classes": torch.randint(0, 100, (num_obj,), device=device)
     }
     class_labels = list(range(100))
     input_dim = 5  # [center_x, center_y, width, height, class]
 
     # Initialize the Logic Tensor Networks instance
-    ltn_network = Logic_Tensor_Networks(detector_output, input_dim, class_labels)
-    # Optionally set the training dataset in the instance
+    ltn_network = Logic_Tensor_Networks(detector_output, input_dim, class_labels, device=device)
     ltn_network.train_dataset = train_dataset
 
     # Train the "ON" predicate using the DataLoader method
-    ltn_network.train_predicate(predicate_name="on", train_data=train_dataset, epochs=500, batch_size=16, lr=0.001)
+    ltn_network.train_predicate(predicate_name="on", train_data=train_dataset, epochs=100, batch_size=1024, lr=0.001)
