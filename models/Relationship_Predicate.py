@@ -68,7 +68,7 @@ class Near(nn.Module):
         )
     
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-        features = torch.cat([x, y], dim=-1)
+        features = torch.cat([x, y], dim=1)
         return self.score_net(features)
 
 
