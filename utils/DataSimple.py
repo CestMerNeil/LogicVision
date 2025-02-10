@@ -3,11 +3,11 @@
 
 import json
 
-# input_file = '/Volumes/T7_Shield/Datasets/relationships.json'
-input_file = '/Volumes/T7_Shield/Datasets/image_data.json'
-# output_file = 'data/relationships.json'
-output_file = 'data/image_data.json'
-sample_size = 1000
+input_file = '/root/autodl-tmp/relationships_full.json'
+# input_file = '/root/autodl-tmp/image_data_full.json'
+output_file = '/root/autodl-tmp/relationships.json'
+# output_file = '/root/autodl-tmp/image_data.json'
+sample_size = 10000
 
 with open(input_file, 'r', encoding='utf-8') as f:
     data = json.load(f)
