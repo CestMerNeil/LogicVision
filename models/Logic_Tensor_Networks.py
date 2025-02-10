@@ -126,7 +126,7 @@ class Logic_Tensor_Networks:
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
         loss_fn = nn.BCELoss()
-        optimizer = torch.optim.Adam(pred_net.parameters(), lr=lr)
+        optimizer = torch.optim.AdamW(pred_net.parameters(), lr=lr)
 
         # 开始训练和验证循环
         for epoch in range(epochs):

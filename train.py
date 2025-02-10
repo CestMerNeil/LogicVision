@@ -16,10 +16,12 @@ def main():
         config = tomllib.load(f)
 
     pos_predicate = "near"
-    neg_predicate = "next_to"
+    neg_predicate = "is"
 
-    relationships_path = os.path.join(PROJECT_ROOT, "data", "relationships.json")
-    image_meta_path = os.path.join(PROJECT_ROOT, "data", "image_data.json")
+    # relationships_path = os.path.join(PROJECT_ROOT, "data", "relationships.json")
+    # image_meta_path = os.path.join(PROJECT_ROOT, "data", "image_data.json")
+    relationships_path = "/root/autodl-tmp/relationships.json"
+    image_meta_path = "/root/autodl-tmp/image_data.json"
 
     train_dataset = RelationshipDataset(
         relationships_json_path=relationships_path,
@@ -51,9 +53,9 @@ def main():
     input_dim = 5 # center2d, width, height, class
     ltn_network = Logic_Tensor_Networks(detector_output, input_dim, class_labels)
 
-    epochs = 1000
-    batch_size = 2048
-    lr = 0.01
+    epochs = 100
+    batch_size = 1024
+    lr = 0.001
     ltn_network.train_predicate(
         pos_predicate, 
         full_data=train_dataset,
