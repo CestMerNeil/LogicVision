@@ -86,17 +86,19 @@ class Logic_Tensor_Networks:
             print(f"  {key}: {var.value.shape}")
         return variables
 
-    def train_predicate(self, predicate_name: str, train_data: Dataset, epochs: int, batch_size: int, lr: float):
+    def train_predicate(self, predicate_name: str, full_data: Dataset, epochs: int, batch_size: int, lr: float, val_split: float = 0.2):
         """
-        Trains a single relationship predicate network using a DataLoader.
-        
-        :param predicate_name: One of "in", "on", "next_to", "on_top_of", "near", "under"
-        :param train_data: A PyTorch Dataset returning (subject_features, object_features, label)
-                           where features have shape [input_dim] and label is 1 for positive and 0 for negative samples.
-        :param epochs: Number of training epochs.
-        :param batch_size: Mini-batch size.
-        :param lr: Learning rate.
+        使用单一数据集自动分割成训练集和验证集，对指定关系谓词进行训练和验证。
+
+        :param predicate_name: 关系谓词名称，取值为 "in", "on", "next_to", "on_top_of", "near", "under" 之一。
+        :param full_data: 一个 PyTorch Dataset，返回 (subject_features, object_features, label)
+                        其中 features 的形状为 [input_dim]，label 为 1（正例）或 0（负例）。
+        :param epochs: 训练的 epoch 数量。
+        :param batch_size: mini-batch 大小。
+        :param lr: 学习率。
+        :param val_split: 验证集占总数据集的比例，默认 0.2（即 20% 用于验证）。
         """
+        # 仅在此处判断一次谓词名称，选择对应的谓词网络
         predicate_name_lower = predicate_name.lower()
         if predicate_name_lower == "in":
             pred_net = self.in_predicate
@@ -113,23 +115,36 @@ class Logic_Tensor_Networks:
         else:
             raise ValueError(f"Invalid predicate: {predicate_name}")
 
-        pred_net.train()
-        data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+        # 自动分割数据集：训练集与验证集
+        total_size = len(full_data)
+        val_size = int(val_split * total_size)
+        train_size = total_size - val_size
+        train_dataset, val_dataset = torch.utils.data.random_split(full_data, [train_size, val_size])
+        print(f"Total samples: {total_size}, Training samples: {train_size}, Validation samples: {val_size}")
+
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
         loss_fn = nn.BCELoss()
         optimizer = torch.optim.Adam(pred_net.parameters(), lr=lr)
 
+        # 开始训练和验证循环
         for epoch in range(epochs):
-            epoch_loss = 0.0
-            num_batches = 0
-            for batch in tqdm(data_loader, desc=f"Epoch {epoch+1}/{epochs}", leave=False):
+            pred_net.train()  # 训练模式
+            epoch_train_loss = 0.0
+            train_batches = 0
+
+            for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} - Training", leave=False):
                 subj_features, obj_features, labels = batch
                 subj_features = subj_features.to(self.device)
                 obj_features = obj_features.to(self.device)
                 labels = labels.view(-1, 1).float().to(self.device)
 
-                subj_obj = ltn.Variable("subj", subj_features)  # shape: [batch_size, 5]
+                # 将输入包装为 LTN Variable（确保数据在 self.device 上）
+                subj_obj = ltn.Variable("subj", subj_features)
                 obj_obj = ltn.Variable("obj", obj_features)
 
+                # 前向传播，并提取对角线上的输出作为预测值
                 outputs = pred_net(subj_obj, obj_obj).value.diag().unsqueeze(1)
                 loss = loss_fn(outputs, labels)
 
@@ -137,13 +152,47 @@ class Logic_Tensor_Networks:
                 loss.backward()
                 optimizer.step()
 
-                epoch_loss += loss.item()
-                num_batches += 1
+                epoch_train_loss += loss.item()
+                train_batches += 1
 
-            avg_loss = epoch_loss / num_batches if num_batches > 0 else 0.0
-            if (epoch + 1) % 100 == 0 or epoch == 0:
-                print(f"Epoch {epoch+1}/{epochs} for predicate '{predicate_name}', Loss: {avg_loss:.4f}")
+            avg_train_loss = epoch_train_loss / train_batches if train_batches > 0 else 0.0
 
+            # 验证阶段：模型切换到评估模式，且不计算梯度
+            pred_net.eval()
+            epoch_val_loss = 0.0
+            val_batches = 0
+            correct = 0
+            total = 0
+
+            with torch.no_grad():
+                for batch in val_loader:
+                    subj_features, obj_features, labels = batch
+                    subj_features = subj_features.to(self.device)
+                    obj_features = obj_features.to(self.device)
+                    labels = labels.view(-1, 1).float().to(self.device)
+
+                    subj_obj = ltn.Variable("subj", subj_features)
+                    obj_obj = ltn.Variable("obj", obj_features)
+
+                    outputs = pred_net(subj_obj, obj_obj).value.diag().unsqueeze(1)
+                    loss = loss_fn(outputs, labels)
+                    epoch_val_loss += loss.item()
+                    val_batches += 1
+
+                    # 使用 0.5 为阈值判断预测类别
+                    preds = (outputs >= 0.5).float()
+                    correct += (preds == labels).sum().item()
+                    total += labels.size(0)
+
+            avg_val_loss = epoch_val_loss / val_batches if val_batches > 0 else 0.0
+            accuracy = correct / total if total > 0 else 0.0
+
+            # 每个 epoch 输出训练与验证结果
+            if (epoch + 1) % 10 == 0 or epoch == 0:
+                print(f"Epoch {epoch+1}/{epochs}: Train Loss = {avg_train_loss:.4f}, "
+                    f"Val Loss = {avg_val_loss:.4f}, Val Accuracy = {accuracy:.4f}")
+
+        # 保存训练后的权重
         import os
         os.makedirs("weights", exist_ok=True)
         weight_path = f"weights/{predicate_name_lower}_predicate_weights.pth"

@@ -56,7 +56,7 @@ def main():
     lr = 0.01
     ltn_network.train_predicate(
         pos_predicate, 
-        train_data=train_dataset,
+        full_data=train_dataset,
         epochs=epochs, 
         batch_size=batch_size,
         lr=lr
