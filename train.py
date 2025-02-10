@@ -20,8 +20,8 @@ def main():
 
     # relationships_path = os.path.join(PROJECT_ROOT, "data", "relationships.json")
     # image_meta_path = os.path.join(PROJECT_ROOT, "data", "image_data.json")
-    relationships_path = "/root/autodl-tmp/relationships.json"
-    image_meta_path = "/root/autodl-tmp/image_data.json"
+    relationships_path = "/root/autodl-tmp/relationships_full.json"
+    image_meta_path = "/root/autodl-tmp/image_data_full.json"
 
     train_dataset = RelationshipDataset(
         relationships_json_path=relationships_path,
