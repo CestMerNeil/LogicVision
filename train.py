@@ -31,6 +31,10 @@ def main():
     print(len(train_dataset))
     print("train_dataset[0]: ", end="")
     print(train_dataset[0])
+    print("train_dataset[1]: ", end="")
+    print(train_dataset[1])
+    print("train_dataset[2]: ", end="")
+    print(train_dataset[2])
 
 
     num_obj = 100
