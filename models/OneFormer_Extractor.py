@@ -6,13 +6,13 @@ from typing import Dict, List
 
 from transformers import OneFormerProcessor, OneFormerForUniversalSegmentation
 
+# Load configuration from the TOML file.
 with open("config.toml", "rb") as config_file:
     config = tomllib.load(config_file)
 
-pprint.pprint(f"Config List: {config}")
-
 class OneFormer_Extractor:
     def __init__(self):
+        # Initialize the processor and model using pretrained weights specified in the config.
         self.processor = OneFormerProcessor.from_pretrained(
             config['OneFormer_Extractor']['processor'],
             # cache_dir=config['OneFormer_Extractor']['cache_dir']
@@ -40,29 +40,19 @@ class OneFormer_Extractor:
     @torch.no_grad()
     def predict(self, image: Image.Image) -> Dict[str, torch.Tensor]:
         """
-        Predict the objects in a single image using the OneFormer model.
-        The input is in PIL Image format.
-        
-        Args:
-            image (PIL.Image.Image): The input image.
-        
-        Returns:
-            Dict[str, torch.Tensor]: A dictionary containing the detection results:
-                "boxes", "centers", "widths", "heights", "scores", "classes", "masks", "num_objects"
+        Predict objects in a single image using the OneFormer model.
         """
-        # Directly use the input PIL Image without conversion.
         inputs = self.processor(
             images=image,
             task_inputs=[config['OneFormer_Extractor']['task_inputs']],
             return_tensors="pt"
         )
         outputs = self.model(**inputs)
-
-        # PIL Image size is (width, height); reverse it to (height, width)
+        # Reverse image size from (width, height) to (height, width) for processing.
         return self._process_result(outputs, image_size=image.size[::-1])
 
     def _process_result(self, outputs, image_size: tuple) -> Dict[str, torch.Tensor]:
-        H, W = image_size
+        H, W = image_size  # Extract height and width.
         processed = self.processor.post_process_panoptic_segmentation(
             outputs,
             threshold=self.conf_threshold,
@@ -73,11 +63,12 @@ class OneFormer_Extractor:
         panoptic_seg = processed["segmentation"]
         segments_info = processed["segments_info"]
 
-        # Return a dictionary containing only the detected object information.
+        # Convert the panoptic segmentation result to instance-level detection outputs.
         instance_res = self._panoptic_to_instance(panoptic_seg, segments_info)
         return instance_res
 
     def _panoptic_to_instance(self, panoptic_seg: torch.Tensor, segments_info: List[dict]) -> Dict[str, torch.Tensor]:
+        # Convert panoptic segmentation to instance-level results.
         instance_data = []
         for seg in segments_info:
             seg_id = seg["id"]
@@ -157,7 +148,6 @@ if __name__ == "__main__":
 
     print(f"\nTesting single image prediction for {single_image_path}...")
 
-    # Directly use a PIL Image as input.
     pil_image = Image.open(single_image_path).convert("RGB")
     single_output = extractor.predict(pil_image)
     print("Single image prediction result keys:")
@@ -168,15 +158,3 @@ if __name__ == "__main__":
             class_names = [extractor.labels[int(cls)] for cls in value if cls < extractor.num_classes]
             print(f"    Class IDs: {value.tolist()}")
             print(f"    Class Names: {class_names}")
-
-    # Single image prediction result keys:
-    # boxes: torch.Size([14, 4])
-    # centers: torch.Size([14, 2])
-    # widths: torch.Size([14])
-    # heights: torch.Size([14])
-    # scores: torch.Size([14])
-    # classes: torch.Size([14])
-    #   Class IDs: [83, 4, 20, 20, 6, 20, 43, 43, 43, 32, 32, 20, 20, 2]
-    #   Class Names: ['truck', 'tree', 'car', 'car', 'road, route', 'car', 'signboard, sign', 'signboard, sign', 'signboard, sign', 'fence', 'fence', 'car', 'car', 'sky']
-    # masks: torch.Size([14, 3024, 4032])
-    # num_objects: 14
