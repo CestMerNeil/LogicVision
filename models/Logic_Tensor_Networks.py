@@ -122,8 +122,8 @@ class Logic_Tensor_Networks:
         train_dataset, val_dataset = torch.utils.data.random_split(full_data, [train_size, val_size])
         print(f"Total samples: {total_size}, Training samples: {train_size}, Validation samples: {val_size}")
 
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
         loss_fn = nn.BCELoss()
         optimizer = torch.optim.AdamW(pred_net.parameters(), lr=lr)
