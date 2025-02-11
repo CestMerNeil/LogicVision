@@ -1,22 +1,20 @@
 import os
 import json
 import torch
+import tomllib
 
 from pathlib import Path
 from torch.utils.data import DataLoader
 from models.Logic_Tensor_Networks import Logic_Tensor_Networks
 from utils.DataLoader import RelationshipDataset
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+with open("config.toml", "rb") as config_file:
+    config = tomllib.load(config_file)
 
 def trainer(pos_predicate: str, neg_predicates: list, epoches=1, batch_size=512, lr=0.001):
     # Initialize the dataset
-    # Path for Cloud GPU at Auto DL
-    relationships_path = "/root/autodl-tmp/relationships.json"
-    image_meta_path = "/root/autodl-tmp/image_data.json"
-
-    # relationships_path = os.path.join(PROJECT_ROOT, "data/relationships.json")
-    # image_meta_path = os.path.join(PROJECT_ROOT, "data/image_data.json")
+    relationships_path = config["Trainer"]["relationships_path"]
+    image_meta_path = config["Trainer"]["image_meta_path"]
 
     train_dataset = RelationshipDataset(
         relationships_json_path=relationships_path,

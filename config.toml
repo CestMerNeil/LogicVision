@@ -3,8 +3,12 @@
 
 [Train]
 lr = 0.001
-epochs = 10
+epochs = 1
 batch_size = 64
+
+[Trainer]
+relationships_path = "/root/autodl-tmp/relationships.json"
+image_meta_path = "/root/autodl-tmp/image_data.json"
 
 [OneFormer_Extractor]
 processor = "./cache_pretrained/models--shi-labs--oneformer_ade20k_swin_large/snapshots/4a5bac8e64f82681a12db2e151a4c2f4ce6092b2"
