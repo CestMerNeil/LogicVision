@@ -14,20 +14,20 @@ class RelationshipDataset(Dataset):
         self.pos_predicate = pos_predicate.lower()
         self.neg_predicates = [p.lower() for p in neg_predicates]
         
-        # 选择是否使用 CUDA
+        # Choose CUDA if available
         self.device = torch.device("cuda" if use_cuda and torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
 
-        # 读取 image_data.json
+        # Load image metadata from JSON file
         with open(image_meta_json_path, 'r') as f:
             image_meta_data = json.load(f)
         self.image_meta = {img["image_id"]: img for img in image_meta_data}
 
-        # 读取 relationships.json
+        # Load relationships data from JSON file
         with open(relationships_json_path, 'r') as f:
             relationships_data = json.load(f)
 
-        # 使用多线程处理
+        # Process relationship data with multithreading
         print("Processing relationship data with multithreading...")
         with ThreadPoolExecutor() as executor:
             list(tqdm(executor.map(self._process_image, relationships_data), total=len(relationships_data), desc="Loading Images"))
@@ -43,6 +43,7 @@ class RelationshipDataset(Dataset):
         positive_pairs = []
         object_features = {}
 
+        # Process each relationship in the image
         for rel in relationships:
             subj_feat = self._extract_features(rel["subject"], img_width, img_height)
             obj_feat = self._extract_features(rel["object"], img_width, img_height)
@@ -50,17 +51,20 @@ class RelationshipDataset(Dataset):
                 continue
 
             if rel["predicate"].lower() == self.pos_predicate:
+                # Append positive sample with label 1.0
                 self.samples.append((subj_feat, obj_feat, torch.tensor(1.0, device=self.device)))
                 subj_id = rel["subject"].get("object_id")
                 obj_id = rel["object"].get("object_id")
                 if subj_id and obj_id:
                     positive_pairs.append((subj_id, obj_id))
 
+            # Store object features for later negative sampling if object_id exists
             if "object_id" in rel["subject"]:
                 object_features[rel["subject"]["object_id"]] = subj_feat
             if "object_id" in rel["object"]:
                 object_features[rel["object"]["object_id"]] = obj_feat
 
+        # Generate negative samples for this image
         self._generate_negative_samples(object_features, positive_pairs)
 
     def _extract_features(self, obj, img_width, img_height):
@@ -81,32 +85,40 @@ class RelationshipDataset(Dataset):
 
     def _generate_negative_samples(self, object_features, positive_pairs):
         """
-        Generate negative samples using CUDA.
+        Efficiently generate negative samples using random sampling.
+        
+        Instead of iterating over all possible pairs, this method randomly samples pairs
+        until we have as many negatives as positive samples (or until no more negatives are possible).
         """
         object_ids = list(object_features.keys())
-        candidate_negatives = []
-        for i in range(len(object_ids)):
-            for j in range(len(object_ids)):
-                if i != j:
-                    pair = (object_ids[i], object_ids[j])
-                    if pair not in positive_pairs:
-                        candidate_negatives.append(
-                            (object_features[object_ids[i]], object_features[object_ids[j]])
-                        )
-        
-        num_pos = len(positive_pairs)
-        if candidate_negatives:
-            sampled_negatives = random.sample(candidate_negatives, min(num_pos, len(candidate_negatives)))
-            for neg in sampled_negatives:
-                self.samples.append((neg[0], neg[1], torch.tensor(0.0, device=self.device)))
-        
-        # 直接在 GPU 上打乱数据
-        if self.device.type == "cuda":
-            self.samples = [(
-                s.to(self.device), 
-                o.to(self.device), 
-                torch.tensor(l, dtype=torch.float32, device=self.device)
-            ) for s, o, l in self.samples]
+        num_objects = len(object_ids)
+        if num_objects < 2:
+            return
+
+        # Create a set for quick lookup of positive pairs
+        positive_set = set(positive_pairs)
+        # Calculate the maximum possible negative pairs
+        max_possible_negatives = num_objects * (num_objects - 1) - len(positive_set)
+        num_positives = len(positive_pairs)
+        num_negatives_needed = min(num_positives, max_possible_negatives)
+        if num_negatives_needed <= 0:
+            return
+
+        candidate_negatives = set()
+
+        # Randomly sample negative pairs until the required number is reached
+        while len(candidate_negatives) < num_negatives_needed:
+            subj_id, obj_id = random.sample(object_ids, 2)
+            pair = (subj_id, obj_id)
+            if pair in positive_set or pair in candidate_negatives:
+                continue
+            candidate_negatives.add(pair)
+
+        # Append negative samples with label 0.0
+        for subj_id, obj_id in candidate_negatives:
+            self.samples.append((object_features[subj_id], object_features[obj_id], torch.tensor(0.0, device=self.device)))
+
+        # Shuffle the samples to mix positive and negative examples
         random.shuffle(self.samples)
 
     def __len__(self):
