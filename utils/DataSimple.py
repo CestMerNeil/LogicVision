@@ -5,7 +5,7 @@ input_file = '/root/autodl-tmp/relationships_full.json'
 # input_file = '/root/autodl-tmp/image_data_full.json'
 output_file = '/root/autodl-tmp/relationships.json'
 # output_file = '/root/autodl-tmp/image_data.json'
-sample_size = 10000
+sample_size = 1000
 
 with open(input_file, 'r', encoding='utf-8') as f:
     data = json.load(f)

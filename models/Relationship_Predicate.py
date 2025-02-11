@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import ltn
 
-class In(nn.Module):
+class In(ltn.Predicate):
     def __init__(self, input_dim):
         net = nn.Sequential(
             nn.Linear(input_dim * 2, 512),
@@ -31,7 +31,7 @@ class In(nn.Module):
         combined = torch.cat([subj_tensor, obj_tensor], dim=-1).view(-1, 10)
         return self.net(combined)
 
-class On(nn.Module):
+class On(ltn.Predicate):
     def __init__(self, input_dim):
         net = nn.Sequential(
             nn.Linear(input_dim * 2, 512),
@@ -60,7 +60,7 @@ class On(nn.Module):
         combined = torch.cat([subj_tensor, obj_tensor], dim=-1).view(-1, 10)
         return self.net(combined)
 
-class NextTo(nn.Module):
+class NextTo(ltn.Predicate):
     def __init__(self, input_dim):
         net = nn.Sequential(
             nn.Linear(input_dim * 2, 512),
@@ -89,7 +89,7 @@ class NextTo(nn.Module):
         combined = torch.cat([subj_tensor, obj_tensor], dim=-1).view(-1, 10)
         return self.net(combined)
 
-class OnTopOf(nn.Module):
+class OnTopOf(ltn.Predicate):
     def __init__(self, input_dim):
         net = nn.Sequential(
             nn.Linear(input_dim * 2, 512),
@@ -159,7 +159,7 @@ class Near(ltn.Predicate):
         # Pass the combined tensor through the network and return the output.
         return self.net(combined)
 
-class Under(nn.Module):
+class Under(ltn.Predicate):
     def __init__(self, input_dim):
         net = nn.Sequential(
             nn.Linear(input_dim * 2, 512),

@@ -7,11 +7,16 @@ from torch.utils.data import DataLoader
 from models.Logic_Tensor_Networks import Logic_Tensor_Networks
 from utils.DataLoader import RelationshipDataset
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
 def trainer(pos_predicate: str, neg_predicates: list, epoches=1, batch_size=512, lr=0.001):
     # Initialize the dataset
     # Path for Cloud GPU at Auto DL
     relationships_path = "/root/autodl-tmp/relationships.json"
     image_meta_path = "/root/autodl-tmp/image_data.json"
+
+    # relationships_path = os.path.join(PROJECT_ROOT, "data/relationships.json")
+    # image_meta_path = os.path.join(PROJECT_ROOT, "data/image_data.json")
 
     train_dataset = RelationshipDataset(
         relationships_json_path=relationships_path,
@@ -43,7 +48,13 @@ def trainer(pos_predicate: str, neg_predicates: list, epoches=1, batch_size=512,
     }
 
     ltn_network = Logic_Tensor_Networks(detector_output, input_dim, class_labels)
-    ltn_network.train_predicate(pos_predicate, neg_predicates, train_dataset, epoches, batch_size, lr)
+    ltn_network.train_predicate(
+        predicate_name=pos_predicate, 
+        full_data=train_dataset, 
+        epochs=epoches, 
+        batch_size=batch_size, 
+        lr=lr
+    )
 
 if __name__ == "__main__":
     pos_predicate = "near"

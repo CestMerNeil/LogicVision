@@ -22,6 +22,7 @@ class Logic_Tensor_Networks:
             device = auto_select_device()
         self.device = device
         print(f"Using device: {self.device}")
+        self.train = train
 
         processed_detector_output = {}
         for key, value in detector_output.items():
@@ -43,16 +44,31 @@ class Logic_Tensor_Networks:
         self.variables = self._variable_builder(self.detector_output)
 
         # Initialize predicate networks.
-        self.in_predicate        = ltn.Predicate(In(input_dim)).to(self.device)
-        self.on_predicate        = ltn.Predicate(On(input_dim)).to(self.device)
-        self.next_to_predicate   = ltn.Predicate(NextTo(input_dim)).to(self.device)
-        self.on_top_of_predicate = ltn.Predicate(OnTopOf(input_dim)).to(self.device)
+        self.in_predicate        = In(input_dim).to(self.device)
+        self.on_predicate        = On(input_dim).to(self.device)
+        self.next_to_predicate   = NextTo(input_dim).to(self.device)
+        self.on_top_of_predicate = OnTopOf(input_dim).to(self.device)
         self.near_predicate      = Near(input_dim).to(self.device)
-        self.under_predicate     = ltn.Predicate(Under(input_dim)).to(self.device)
+        self.under_predicate     = Under(input_dim).to(self.device)
 
         if not train:
+            self.in_predicate.model.load_state_dict(
+                torch.load("weights/in_predicate_weights.pth", map_location=self.device, weights_only=True)
+            )
+            self.on_predicate.model.load_state_dict(
+                torch.load("weights/on_predicate_weights.pth", map_location=self.device, weights_only=True)
+            )
+            self.next_to_predicate.model.load_state_dict(
+                torch.load("weights/next_to_predicate_weights.pth", map_location=self.device, weights_only=True)
+            )
+            self.on_top_of_predicate.model.load_state_dict(
+                torch.load("weights/on_top_of_predicate_weights.pth", map_location=self.device, weights_only=True)
+            )
             self.near_predicate.model.load_state_dict(
                 torch.load("weights/near_predicate_weights.pth", map_location=self.device, weights_only=True)
+            )
+            self.under_predicate.model.load_state_dict(
+                torch.load("weights/under_predicate_weights.pth", map_location=self.device, weights_only=True)
             )
 
     def _variable_builder(self, detector_output: dict):
