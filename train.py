@@ -14,12 +14,13 @@ class predicate(Enum):
     Under = "under"
 
 def train():
-    epoches = config["Train"]["epoches"]
+    epoches = config["Train"]["epochs"]
     batch_size = config["Train"]["batch_size"]
     lr = config["Train"]["lr"]
 
     for pred in predicate:
         neg_predicates = [p for p in predicate if p != pred]
+        print(f"Training {pred} predicate")
         trainer(pred, neg_predicates, epoches, batch_size, lr)
 
 if __name__ == "__main__":
