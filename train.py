@@ -1,6 +1,7 @@
 from enum import Enum
 from utils.Trainer import trainer
 import tomllib
+import torch.multiprocessing as mp
 
 with open("config.toml", "rb") as config_file:
     config = tomllib.load(config_file)
@@ -31,4 +32,5 @@ def train():
         )
 
 if __name__ == "__main__":
+    mp.set_start_method("spawn", force=True)
     train()
