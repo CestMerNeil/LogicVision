@@ -3,6 +3,7 @@ import json
 from torch.utils.data import Dataset
 import random
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
 
 class RelationshipDataset(Dataset):
     def __init__(self, relationships_json_path, image_meta_json_path, pos_predicate, neg_predicates):
@@ -26,8 +27,8 @@ class RelationshipDataset(Dataset):
         with open(relationships_json_path, 'r') as f:
             relationships_data = json.load(f)
 
-        for image_entry in tqdm(relationships_data, desc="Loading Images"):
-            self._process_image(image_entry)
+        with ThreadPoolExecutor() as executor:
+            list(tqdm(executor.map(self._process_image, relationships_data), total=len(relationships_data), desc="Loading Images"))
 
     def _process_image(self, image_entry):
         image_id = image_entry["image_id"]
