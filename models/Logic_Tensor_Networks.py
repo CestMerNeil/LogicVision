@@ -132,7 +132,7 @@ class Logic_Tensor_Networks:
             pred_net.train()
             epoch_train_loss = 0.0
             train_batches = 0
-            for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} - Training", leave=False):
+            for batch in train_loader:
                 subj_features, obj_features, labels = batch
                 subj_features = subj_features.to(self.device)
                 obj_features = obj_features.to(self.device)

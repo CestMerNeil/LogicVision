@@ -27,7 +27,7 @@ class RelationshipDataset(Dataset):
 
         # 多线程处理优化
         print("Optimizing data loading with parallel processing...")
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers=16) as executor:
             futures = []
             for chunk in chunked_json_loader(relationships_json_path):
                 futures.append(executor.submit(self.process_chunk, chunk))
@@ -71,7 +71,7 @@ class RelationshipDataset(Dataset):
             if subj_feat is not None and obj_feat is not None:
                 predicate = rel["predicate"].lower()
                 if predicate == self.pos_predicate:
-                    samples.append((subj_feat, obj_feat, torch.tensor(1.0, device=self.device)))
+                    samples.append((subj_feat, obj_feat, torch.tensor(1.0)))
                     if "object_id" in rel["subject"] and "object_id" in rel["object"]:
                         positive_pairs.add((rel["subject"]["object_id"], rel["object"]["object_id"]))
 
@@ -103,7 +103,7 @@ class RelationshipDataset(Dataset):
                 for s_id, o_id in selected:
                     s_idx = obj_ids.index(s_id)
                     o_idx = obj_ids.index(o_id)
-                    samples.append((obj_features[s_idx], obj_features[o_idx], torch.tensor(0.0, device=self.device)))
+                    samples.append((obj_features[s_idx], obj_features[o_idx], torch.tensor(0.0)))
 
         return samples
 
@@ -117,7 +117,7 @@ class RelationshipDataset(Dataset):
             if not (0 <= x <= 1 and 0 <= y <= 1 and w > 0 and h > 0):
                 return None
             class_id = float(obj.get("object_id", 0)) % 1000  # 限制类别数量
-            return torch.tensor([x, y, w, h, class_id], dtype=torch.float32, device=self.device)
+            return torch.tensor([x, y, w, h, class_id], dtype=torch.float32)
         except (KeyError, TypeError, ValueError):
             return None
 
