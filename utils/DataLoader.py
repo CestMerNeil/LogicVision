@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 import random
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
+import numpy as np  # Added for potential vectorized operations
 
 class RelationshipDataset(Dataset):
     def __init__(self, relationships_json_path, image_meta_json_path, pos_predicate, neg_predicates, use_cuda=True):
@@ -50,15 +51,15 @@ class RelationshipDataset(Dataset):
             if subj_feat is None or obj_feat is None:
                 continue
 
+            # If the predicate matches the positive predicate, save as a positive sample
             if rel["predicate"].lower() == self.pos_predicate:
-                # Append positive sample with label 1.0
                 self.samples.append((subj_feat, obj_feat, torch.tensor(1.0, device=self.device)))
                 subj_id = rel["subject"].get("object_id")
                 obj_id = rel["object"].get("object_id")
                 if subj_id and obj_id:
                     positive_pairs.append((subj_id, obj_id))
 
-            # Store object features for later negative sampling if object_id exists
+            # Save object features if object_id exists, for later negative sampling
             if "object_id" in rel["subject"]:
                 object_features[rel["subject"]["object_id"]] = subj_feat
             if "object_id" in rel["object"]:
@@ -85,36 +86,48 @@ class RelationshipDataset(Dataset):
 
     def _generate_negative_samples(self, object_features, positive_pairs):
         """
-        Efficiently generate negative samples using random sampling.
-        
-        Instead of iterating over all possible pairs, this method randomly samples pairs
-        until we have as many negatives as positive samples (or until no more negatives are possible).
+        Generate negative samples efficiently using batch sampling.
+
+        Instead of iterating over all possible pairs or sampling one pair at a time,
+        we sample candidate pairs in batches. This is particularly beneficial when
+        the number of objects per image is large, reducing the time spent in rejection
+        sampling.
         """
         object_ids = list(object_features.keys())
         num_objects = len(object_ids)
         if num_objects < 2:
             return
 
-        # Create a set for quick lookup of positive pairs
         positive_set = set(positive_pairs)
-        # Calculate the maximum possible negative pairs
-        max_possible_negatives = num_objects * (num_objects - 1) - len(positive_set)
         num_positives = len(positive_pairs)
+        max_possible_negatives = num_objects * (num_objects - 1) - len(positive_set)
         num_negatives_needed = min(num_positives, max_possible_negatives)
         if num_negatives_needed <= 0:
             return
 
         candidate_negatives = set()
+        # Set an initial batch size based on the number of negatives needed
+        batch_size = num_negatives_needed * 2
 
-        # Randomly sample negative pairs until the required number is reached
+        # Use batch sampling to reduce the overhead of rejection sampling one pair at a time
         while len(candidate_negatives) < num_negatives_needed:
-            subj_id, obj_id = random.sample(object_ids, 2)
-            pair = (subj_id, obj_id)
-            if pair in positive_set or pair in candidate_negatives:
-                continue
-            candidate_negatives.add(pair)
+            # Randomly choose candidates in batches; random.choices allows duplicates
+            batch_subj = random.choices(object_ids, k=batch_size)
+            batch_obj = random.choices(object_ids, k=batch_size)
+            for subj, obj in zip(batch_subj, batch_obj):
+                if subj == obj:
+                    continue
+                pair = (subj, obj)
+                if pair in positive_set or pair in candidate_negatives:
+                    continue
+                candidate_negatives.add(pair)
+                if len(candidate_negatives) >= num_negatives_needed:
+                    break
+            # If not enough negatives were found, increase the batch size for the next iteration
+            if len(candidate_negatives) < num_negatives_needed:
+                batch_size *= 2
 
-        # Append negative samples with label 0.0
+        # Append the generated negative samples with label 0.0
         for subj_id, obj_id in candidate_negatives:
             self.samples.append((object_features[subj_id], object_features[obj_id], torch.tensor(0.0, device=self.device)))
 
