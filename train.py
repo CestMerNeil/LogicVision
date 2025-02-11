@@ -1,70 +1,26 @@
-import json
-import torch
+from enum import Enum
+from utils.Trainer import trainer
 import tomllib
-import os
-from pathlib import Path
 
-from torch.utils.data import DataLoader
-from models.Logic_Tensor_Networks import Logic_Tensor_Networks
-from utils.DataLoader import RelationshipDataset
+with open("config.toml", "rb") as config_file:
+    config = tomllib.load(config_file)
 
-PROJECT_ROOT = Path(__file__).parent
+class predicate(Enum):
+    In = "in",
+    On = "on",
+    NextTo = "next_to",
+    OnTopOf = "on_top_of",
+    Near = "near",
+    Under = "under"
 
-def main():
-    # Load Config
-    with open("config.toml", "rb") as f:
-        config = tomllib.load(f)
+def train():
+    epoches = config["Train"]["epoches"]
+    batch_size = config["Train"]["batch_size"]
+    lr = config["Train"]["lr"]
 
-    pos_predicate = "near"
-    neg_predicate = "is"
-
-    relationships_path = os.path.join(PROJECT_ROOT, "data", "relationships.json")
-    image_meta_path = os.path.join(PROJECT_ROOT, "data", "image_data.json")
-    # relationships_path = "/root/autodl-tmp/relationships.json"
-    # image_meta_path = "/root/autodl-tmp/image_data.json"
-
-    train_dataset = RelationshipDataset(
-        relationships_json_path=relationships_path,
-        image_meta_json_path=image_meta_path, 
-        pos_predicate=pos_predicate,
-        neg_predicates=neg_predicate
-    )
-    print("Length of train_dataset: ", end="")
-    print(len(train_dataset))
-    print("train_dataset[0]: ", end="")
-    print(train_dataset[0])
-    print("train_dataset[1]: ", end="")
-    print(train_dataset[1])
-    print("train_dataset[2]: ", end="")
-    print(train_dataset[2])
-
-
-    num_obj = 100
-
-    detector_output = {
-        "centers": torch.randn(num_obj, 2),
-        "widths": torch.randn(num_obj, 1),
-        "heights": torch.randn(num_obj, 1),
-        "classes": torch.randint(0, 10, (num_obj,))
-    }
-
-    class_labels = list(range(100))
-
-    input_dim = 5 # center2d, width, height, class
-    ltn_network = Logic_Tensor_Networks(detector_output, input_dim, class_labels)
-
-    epochs = 1
-    batch_size = 512
-    lr = 0.001
-    ltn_network.train_predicate(
-        pos_predicate, 
-        full_data=train_dataset,
-        epochs=epochs, 
-        batch_size=batch_size,
-        lr=lr
-        )
+    for pred in predicate:
+        neg_predicates = [p for p in predicate if p != pred]
+        trainer(pred, neg_predicates, epoches, batch_size, lr)
 
 if __name__ == "__main__":
-    main()
-
-    
+    train()

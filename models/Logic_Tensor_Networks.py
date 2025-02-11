@@ -75,9 +75,11 @@ class Logic_Tensor_Networks:
             if key in ["centers", "widths", "heights"] and concatenated.dim() == 1:
                 concatenated = concatenated.unsqueeze(1)
             variables[key] = ltn.Variable(key, concatenated)
-        print("Constructed Variables:")
-        for key, var in variables.items():
-            print(f"  {key}: {var.value.shape}")
+        if not self.train:
+            print("Constructed Variables:")
+            for key, var in variables.items():
+                print(f"  {key}: {var.value.shape}")
+                
         return variables
 
     def train_predicate(self, predicate_name: str, full_data: Dataset, epochs: int, batch_size: int, lr: float, val_split: float = 0.2):

@@ -1,7 +1,7 @@
 from models.OneFormer_Extractor import OneFormer_Extractor
 from models.Logic_Tensor_Networks import Logic_Tensor_Networks
 from PIL import Image
-from utils.draw import draw_bounding_boxes, save_result_image
+from utils.Draw import draw_bounding_boxes, save_result_image
 
 def inference(image: Image.Image, subj_class: str, obj_class: str, predicate: str, threshold=0.7):
     extractor = OneFormer_Extractor()  # 调用类构造函数

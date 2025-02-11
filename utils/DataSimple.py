@@ -1,6 +1,4 @@
-
 # This script is used to get a sample dataset from a large dataset.
-
 import json
 
 input_file = '/root/autodl-tmp/relationships_full.json'
