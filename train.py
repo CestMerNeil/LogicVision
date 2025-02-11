@@ -13,8 +13,8 @@ def train():
     predicate = [
         "in",
         "on",
-        "next_to",
-        "on_top_of",
+        "next to",
+        "on top of",
         "near",
         "under"
     ]
