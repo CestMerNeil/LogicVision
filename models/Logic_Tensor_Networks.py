@@ -105,9 +105,9 @@ class Logic_Tensor_Networks:
             pred_net = self.in_predicate
         elif predicate_name_lower == "on":
             pred_net = self.on_predicate
-        elif predicate_name_lower == "next_to":
+        elif predicate_name_lower == "next to":
             pred_net = self.next_to_predicate
-        elif predicate_name_lower == "on_top_of":
+        elif predicate_name_lower == "on top of":
             pred_net = self.on_top_of_predicate
         elif predicate_name_lower == "near":
             pred_net = self.near_predicate
@@ -236,9 +236,9 @@ class Logic_Tensor_Networks:
                 pred_net = self.in_predicate
             elif predicate_name_lower == "on":
                 pred_net = self.on_predicate
-            elif predicate_name_lower == "next_to":
+            elif predicate_name_lower == "next to":
                 pred_net = self.next_to_predicate
-            elif predicate_name_lower == "on_top_of":
+            elif predicate_name_lower == "on top of":
                 pred_net = self.on_top_of_predicate
             elif predicate_name_lower == "near":
                 pred_net = self.near_predicate
