@@ -1,35 +1,27 @@
-from models.OneFormer_Extractor import OneFormer_Extractor
-from models.Logic_Tensor_Networks import Logic_Tensor_Networks
+import os
 from PIL import Image
-from utils.Draw import draw_bounding_boxes, save_result_image
+from utils.Inferencer import Inferencer
+from utils.Draw import draw_and_save_result
 
-def inference(image: Image.Image, subj_class: str, obj_class: str, predicate: str, threshold=0.7):
-    extractor = OneFormer_Extractor()  # 调用类构造函数
-    extractor_result = extractor.predict(image)
-
-    labels_list = list(extractor.model.config.id2label.values())
-
-    ltn_instance = Logic_Tensor_Networks(
-        detector_output=extractor_result,
-        input_dim=5,
-        class_labels=labels_list,
-        train=False
+def inference():
+    inferencer = Inferencer(
+        subj_class="person",
+        obj_class="sky",
+        predicate="near",
     )
 
-    result = ltn_instance.inference(subj_class, obj_class, predicate, threshold)
-    return result
+    # Single image inference
+    print("Performing inference on a single image...")
+    image_path = "/Users/neil/Code/LogicVision/images/image6.jpg"
+    image = Image.open(image_path)
+    result = inferencer.inference_single(image)
+    if result.get("exists", True):
+        draw_and_save_result(image, result, "single_result.jpg")
+
+    # Folder inference
+    print("Performing inference on a folder of images...")
+    folder_path = "/Users/neil/Code/LogicVision/images"
+    inferencer.process_folder(folder_path)
 
 if __name__ == "__main__":
-    import os
-
-    single_image_path = "images/image4.jpg"
-    if not os.path.exists(single_image_path):
-        raise FileNotFoundError(f"Image not found: {single_image_path}")
-
-    # 直接使用 PIL Image 作为输入
-    pil_image = Image.open(single_image_path).convert("RGB")
-    result = inference(pil_image, "person", "sky", "near")
-    image_with_boxes = draw_bounding_boxes(pil_image, result)
-    os.makedirs("results", exist_ok=True)
-    save_result_image(image_with_boxes, "image0_result.jpg")
-    print(result)
+    inference()

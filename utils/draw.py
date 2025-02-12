@@ -1,74 +1,88 @@
 import os
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
-def draw_bounding_boxes(image: Image.Image, result: dict) -> Image.Image:
+def draw_and_save_result(image: Image.Image, result: dict, filename: str) -> Image.Image:
     """
-    Draw bounding boxes for subjects and objects on the input image.
-    
+    Draws bounding boxes and labels on the image, and saves it if the relationship exists.
+
     Args:
         image (PIL.Image.Image): The input image.
-        result (dict): Detection results with keys:
-            - "subject_locations": {"centers": [[x, y], ...], "widths": [w, ...], "heights": [h, ...]}
-            - "object_locations": {"centers": [[x, y], ...], "widths": [w, ...], "heights": [h, ...]}
-    
-    Returns:
-        PIL.Image.Image: The image with drawn bounding boxes.
-    """
-    draw = ImageDraw.Draw(image)
+        result (dict): The inference result containing:
+            - "exists" (bool): Whether the relationship is detected.
+            - "subject_locations" (dict): Contains "centers", "widths", and "heights" for subjects.
+            - "object_locations" (dict): Contains "centers", "widths", and "heights" for objects.
+            - "subject_class" (str): The label of the subject.
+            - "object_class" (str): The label of the object.
+        filename (str): The name of the output file.
 
-    # Draw subject bounding boxes in red.
+    Returns:
+        PIL.Image.Image: The image with bounding boxes and labels drawn.
+    """
+    if not result.get("exists", False):
+        print("Relationship does not exist. Image will not be saved.")
+        return image
+
+    draw = ImageDraw.Draw(image)
+    subj_label = result.get("subject_class", "subject")
+    obj_label = result.get("object_class", "object")
+    
+    # Load font, fallback to default if unavailable
+    try:
+        font = ImageFont.truetype("arial.ttf", size=15)
+    except IOError:
+        font = ImageFont.load_default()
+
+    # Draw subject bounding boxes (red)
     subj = result.get("subject_locations", {})
     for center, width, height in zip(subj.get("centers", []),
-                                      subj.get("widths", []),
-                                      subj.get("heights", [])):
+                                     subj.get("widths", []),
+                                     subj.get("heights", [])):
         cx, cy = center
-        left   = cx - width / 2
-        top    = cy - height / 2
-        right  = cx + width / 2
-        bottom = cy + height / 2
+        left, top = cx - width / 2, cy - height / 2
+        right, bottom = cx + width / 2, cy + height / 2
         draw.rectangle([(left, top), (right, bottom)], outline="red", width=2)
+        draw.text((left, top), subj_label, fill="red", font=font)
 
-    # Draw object bounding boxes in blue.
+    # Draw object bounding boxes (blue)
     obj = result.get("object_locations", {})
     for center, width, height in zip(obj.get("centers", []),
-                                      obj.get("widths", []),
-                                      obj.get("heights", [])):
+                                     obj.get("widths", []),
+                                     obj.get("heights", [])):
         cx, cy = center
-        left   = cx - width / 2
-        top    = cy - height / 2
-        right  = cx + width / 2
-        bottom = cy + height / 2
+        left, top = cx - width / 2, cy - height / 2
+        right, bottom = cx + width / 2, cy + height / 2
         draw.rectangle([(left, top), (right, bottom)], outline="blue", width=2)
+        draw.text((left, top), obj_label, fill="blue", font=font)
 
-    return image
-
-def save_result_image(image: Image.Image, filename: str):
-    """
-    Save the image with drawn bounding boxes to the 'results' folder.
-    
-    Args:
-        image (PIL.Image.Image): The image to be saved.
-        filename (str): The filename to use for saving the image.
-    """
+    # Save the processed image
     os.makedirs("results", exist_ok=True)
     file_path = os.path.join("results", filename)
     image.save(file_path)
     print(f"Image saved to {file_path}")
+    
+    return image
 
-# Example usage:
-# from PIL import Image
-# result = {
-#     'subject_locations': {
-#         'centers': [[611.5, 369.5], [641.0, 752.5], [726.0, 383.0]],
-#         'widths': [95, 154, 146],
-#         'heights': [307, 173, 294]
-#     },
-#     'object_locations': {
-#         'centers': [[639.5, 253.5]],
-#         'widths': [1279],
-#         'heights': [507]
-#     }
-# }
-# image = Image.open("path/to/your/image.jpg")
-# image_with_boxes = draw_bounding_boxes(image, result)
-# save_result_image(image_with_boxes, "result.jpg")
+if __name__ == "__main__":
+    from PIL import Image
+
+    result = {
+        'exists': True,
+        'confidence': 1.0,
+        'message': 'Inference successful',
+        'subject_locations': {
+            'centers': [[429.5, 421.0], [352.5, 304.0], [108.5, 283.0]],
+            'widths': [41, 165, 17],
+            'heights': [56, 66, 24]
+        },
+        'object_locations': {
+            'centers': [[449.5, 422.0]],
+            'widths': [899],
+            'heights': [292]
+        },
+        'subject_class': 'person',
+        'object_class': 'tent',
+        'predicate': 'near'
+    }
+    
+    image = Image.open("/Users/neil/Code/LogicVision/images/image0.jpg")
+    image_with_boxes = draw_and_save_result(image, result, "result.jpg")

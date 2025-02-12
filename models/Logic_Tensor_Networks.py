@@ -59,10 +59,10 @@ class Logic_Tensor_Networks:
                 torch.load("weights/on_predicate_weights.pth", map_location=self.device, weights_only=True)
             )
             self.next_to_predicate.model.load_state_dict(
-                torch.load("weights/next_to_predicate_weights.pth", map_location=self.device, weights_only=True)
+                torch.load("weights/next to_predicate_weights.pth", map_location=self.device, weights_only=True)
             )
             self.on_top_of_predicate.model.load_state_dict(
-                torch.load("weights/on_top_of_predicate_weights.pth", map_location=self.device, weights_only=True)
+                torch.load("weights/on top of_predicate_weights.pth", map_location=self.device, weights_only=True)
             )
             self.near_predicate.model.load_state_dict(
                 torch.load("weights/near_predicate_weights.pth", map_location=self.device, weights_only=True)
@@ -255,7 +255,10 @@ class Logic_Tensor_Networks:
                 "confidence": round(aggregated_score.item(), 3),
                 "message": "Inference successful",
                 "subject_locations": subj_locations,
-                "object_locations": obj_locations
+                "object_locations": obj_locations,
+                "subject_class": subj_class,
+                "object_class": obj_class,
+                "predicate": predicate
             }
 
         except Exception as e:
