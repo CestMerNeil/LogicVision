@@ -3,7 +3,7 @@
 [![中文](https://cdn3.iconfinder.com/data/icons/142-mini-country-flags-16x16px/32/flag-china2x.png)](/README/README_zh_CN.md)
 [![日本語](https://cdn3.iconfinder.com/data/icons/142-mini-country-flags-16x16px/32/flag-japan2x.png)](/README/README_ja_JP.md)
 
-# 利用逻辑张量神经网络理解视觉场景 🚀🤖
+# Comprendre les scènes visuelles à l'aide de réseaux de neurones à tenseur logistique 🚀🤖🤖
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=flat-square)](https://www.python.org)
 [![CUDA 12.4](https://img.shields.io/badge/CUDA-12.4-red?style=flat-square)](https://developer.nvidia.com/cuda-toolkit)
@@ -12,36 +12,36 @@
 [![YOLO](https://img.shields.io/badge/Detection-YOLO-orange?style=flat-square)](https://github.com/ultralytics/ultralytics)
 [![OneFormer](https://img.shields.io/badge/Segmentation-OneFormer-brightgreen?style=flat-square)](https://github.com/isl-org/OneFormer)
 
-本项目结合分割模型与逻辑张量网络，通过一阶逻辑公式和多层感知机网络，实现图像中物体关系的推理，提升图像内容分析能力。✨
+Ce projet combine un modèle de segmentation et un réseau tensoriel logique pour réaliser le raisonnement de la relation entre les objets dans les images et améliorer l'analyse du contenu de l'image grâce à une formule logique de premier ordre et à un réseau perceptron multicouche. par le biais d'une formule logique de premier ordre et d'un réseau perceptron multicouche. ✨
 
 ---
 
-## 技术架构
+## Architecture technique
 
-1. **分割与特征提取**：使用 YOLOv8 / OneFormer  
-2. **物体筛选**：保留感兴趣的物体  
-3. **逻辑张量生成**：对物体对进行笛卡尔积生成逻辑张量  
-4. **逻辑推理**：利用逻辑张量进行关系谓词推理  
-5. **结果输出**：输出推理结果
+1. **Segmentation et extraction de caractéristiques** : utilisation de YOLOv8 / OneFormer
+2. **Criblage des objets** : conservation des objets présentant un intérêt
+3. **Génération de tenseurs logiques** : produit cartésien de paires d'objets pour générer un tenseur logique
+4. **Raisonnement logique** : raisonnement par prédicats relationnels à l'aide du tenseur logique
+5) **Sortie des résultats** : sortie des résultats du raisonnement
 
 
-## 安装指南
+## Guide d'installation
 
-### 训练环境 (Ubuntu 22.04)
+### Environnement de formation (Ubuntu 22.04)
 ```bash
 pip install -r requirements.train.txt
 ```
 
-### 推理环境 (macOS 15.3)
+### Environnement de raisonnement (macOS 15.3)
 ```bash
 pip install -r requirements.inference.txt
 ```
 
-程序运行时会自动下载YOLO和OneFormer的预训练模型。
+Des modèles pré-entraînés pour YOLO et OneFormer sont automatiquement téléchargés lors de l'exécution du programme.
 
-## 使用指南
+## Lignes directrices pour l'utilisation
 
-### 训练示例
+### Exemple de formation
 ```Python
 from utils.Trainer import trainer
 import tomllib
@@ -62,7 +62,7 @@ for pred in predicates:
     )
 ```
 
-### 推理示例
+### Exemples de raisonnement
 ```Python
 from PIL import Image
 from utils.Inferencer import Inferencer
@@ -76,8 +76,7 @@ if result.get("exists", True):
     draw_and_save_result(image, result, "result.jpg")
 ```
 
-# 数据库
-使用 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) 数据库中的 relationships 和 image metadata 数据来提取图像信息及特征对信息。
+# Base de données
+Les relations et les métadonnées des images de la base de données [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) ont été utilisées pour extraire les informations sur les images et les paires de caractéristiques. ont été utilisées pour extraire des informations sur les images et des informations sur les paires de caractéristiques.
 
 ---
-
