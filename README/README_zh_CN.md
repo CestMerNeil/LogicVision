@@ -44,36 +44,36 @@ pip install -r requirements.inference.txt
 ### 训练示例
 ```Python
 from utils.Trainer import trainer
-import tomllib
 
-with open("config.toml", "rb") as f:
-    config = tomllib.load(f)
-
-predicates = ["in", "on", "next to", "on top of", "near", "under"]
-params = config["Train"]
-
-for pred in predicates:
+predicate = ["in", "on", "next to"]
+for pred in predicate:
+    print(f"🚂 正在训练 {pred} ...")
     trainer(
         pos_predicate=pred,
-        neg_predicates=[p for p in predicates if p != pred],
-        epoches=params["epochs"],
-        batch_size=params["batch_size"],
-        lr=params["lr"]
+        neg_predicates=[p for p in predicate if p != pred],
+        epoches=50,
+        batch_size=32,
+        lr=1e-4
     )
 ```
 
 ### 推理示例
 ```Python
-from PIL import Image
 from utils.Inferencer import Inferencer
-from utils.Draw import draw_and_save_result
 
-inferencer = Inferencer(subj_class="person", obj_class="sky", predicate="near")
-image = Image.open("path_to_image.jpg")
-result = inferencer.inference_single(image)
+# 初始化推理器
+analyzer = Inferencer(
+    subj_class="person",
+    obj_class="bicycle",
+    predicate="near"
+)
 
-if result.get("exists", True):
-    draw_and_save_result(image, result, "result.jpg")
+# 对单张图片进行推理
+result = analyzer.inference_single("demo.jpg")
+print(f"🔎 存在 ：{result['relation']} (置信度：{result['confidence']:.2f})")
+
+# 对图片文件夹进行推理
+analyzer.process_folder("input_images/")
 ```
 
 # 数据库

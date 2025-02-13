@@ -44,36 +44,36 @@ Pre-trained models for YOLO and OneFormer are automatically downloaded when the 
 ### Example of training
 ```Python
 from utils.Trainer import trainer
-import tomllib
 
-with open("config.toml", "rb") as f.
-    config = tomllib.load(f)
-
-predicates = ["in", "on", "next to", "on top of", "near", "under"]
-params = config["Train"]
-
-for pred in predicates:
+predicate = ["in", "on", "next to"]
+for pred in predicate:
+    print(f"🚂 Training {pred} ...")
     trainer(
         pos_predicate=pred,
-        neg_predicates=[p for p in predicates if p ! = pred],
-        epoches=params["epochs"],
-        batch_size=params["batch_size"],
-        lr=params["lr"]
+        neg_predicates=[p for p in predicate if p != pred],
+        epoches=50,
+        batch_size=32,
+        lr=1e-4
     )
 ```
 
-### Examples of reasoning
+### Examples of inference
 ```Python
-from PIL import Image
 from utils.Inferencer import Inferencer
-from utils.Draw import draw_and_save_result
 
-inferencer = Inferencer(subj_class="person", obj_class="sky", predicate="near")
-image = Image.open("path_to_image.jpg")
-result = inferencer.inference_single(image)
+# Initialize the inferencer
+analyzer = Inferencer(
+    subj_class="person",
+    obj_class="bicycle",
+    predicate="near"
+)
 
-if result.get("exists", True): if result.get("exists", True).
-    draw_and_save_result(image, result, "result.jpg")
+# Perform inference on a single image
+result = analyzer.inference_single("demo.jpg")
+print(f"🔎 Get ：{result['relation']} (Confidence：{result['confidence']:.2f})")
+
+# Perform inference on a folder of images
+analyzer.process_folder("input_images/")
 ```
 
 # Database

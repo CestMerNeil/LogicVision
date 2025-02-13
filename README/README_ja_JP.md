@@ -44,36 +44,36 @@ YOLOとOneFormerの訓練済みモデルは、プログラムの実行時に自�
 ### トレーニングの例
 ```Python
 from utils.Trainer import trainer
-import tomllib
 
-with open("config.toml", "rb") as f.
-    config = tomllib.load(f)
-
-predicates = ["in", "on", "next to", "on top of", "near", "under"]
-params = config["Train"]
-
-for pred in predicates:
+predicate = ["in", "on", "next to"]
+for pred in predicate:
+    print(f"🚂 {pred} 述語を訓練中 ...")
     trainer(
         pos_predicate=pred,
-        neg_predicates=[p for p in predicates if p ! = pred],
-        epoches=params["epochs"],
-        batch_size=params["batch_size"],
-        lr=params["lr"]
+        neg_predicates=[p for p in predicate if p != pred],
+        epoches=50,
+        batch_size=32,
+        lr=1e-4
     )
 ```
 
 ### 推論の例
 ```Python
-from PIL import Image
 from utils.Inferencer import Inferencer
-from utils.Draw import draw_and_save_result
 
-inferencer = Inferencer(subj_class="person", obj_class="sky", predicate="near")
-image = Image.open("path_to_image.jpg")
-result = inferencer.inference_single(image)
+# 推論器を初期化
+analyzer = Inferencer(
+    subj_class="person",
+    obj_class="bicycle",
+    predicate="near"
+)
 
-if result.get("exists", True): if result.get("exists", True).
-    draw_and_save_result(image, result, "result.jpg")
+# 画像の単一推論を実行
+result = analyzer.inference_single("demo.jpg")
+print(f"🔎 Get ：{result['relation']} (Confidence：{result['confidence']:.2f})")
+
+# 画像フォルダの推論を実行
+analyzer.process_folder("input_images/")
 ```
 
 # データベース
