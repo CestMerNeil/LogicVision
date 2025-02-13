@@ -48,7 +48,6 @@ class OneFormer_Extractor:
             return_tensors="pt"
         )
         outputs = self.model(**inputs)
-        # Reverse image size from (width, height) to (height, width) for processing.
         return self._process_result(outputs, image_size=image.size[::-1])
 
     def _process_result(self, outputs, image_size: tuple) -> Dict[str, torch.Tensor]:

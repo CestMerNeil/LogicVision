@@ -1,22 +1,20 @@
 import torch
 import pprint
 import tomllib
-from pathlib import Path
 from typing import Dict, List, Union
 
 from ultralytics import YOLO
 
+# Load configuration from the TOML file.
 with open("config.toml", "rb") as config_file:
     config = tomllib.load(config_file)
-
-pprint.pprint(f"Config List: {config}")
 
 class YOLO_Extractor:
     def __init__(self):
         self.conf_threshold = config['YOLO_Extractor']['conf_threshold']
         self.model = YOLO(config['YOLO_Extractor']['model_path'])
-        self.class_name = self.model.names
-        self.num_classes = len(self.class_name)
+        self.labels = self.model.names
+        self.num_classes = len(self.labels)
 
     def extractor_summary(self):
         """
@@ -24,7 +22,7 @@ class YOLO_Extractor:
         """
         print(f"Model Path: {self.model}")
         print(f"Confidence Threshold: {self.conf_threshold}")
-        print(f"Class Name: {self.class_name}")
+        print(f"Class Name: {self.labels}")
         print(f"Number of Classes: {self.num_classes}")
 
     @torch.no_grad()
@@ -40,65 +38,6 @@ class YOLO_Extractor:
         """
         result = self.model.predict(image, conf=self.conf_threshold)
         return self._process_result(result[0])
-
-    @torch.no_grad()
-    def predict_batch(self, images: torch.Tensor) -> Dict[str, torch.Tensor]:
-        """
-        Predict the images using the YOLO model and align the results for batch processing.
-
-        Args:
-            images (torch.Tensor): Images of shape (N, 3, H, W)
-        
-        Returns:
-            Dict[str, torch.Tensor]: Batch results with aligned tensors
-        """
-        results = self.model.predict(images, conf=self.conf_threshold)
-        
-        batch_results = [self._process_result(result) for result in results]
-        
-        max_objects = max(res['num_objects'].item() for res in batch_results)
-        batch_size = len(batch_results)
-        
-        padded_boxes = torch.zeros((batch_size, max_objects, 4))
-        padded_centers = torch.zeros((batch_size, max_objects, 2))
-        padded_widths = torch.zeros((batch_size, max_objects))
-        padded_heights = torch.zeros((batch_size, max_objects))
-        padded_scores = torch.zeros((batch_size, max_objects))
-        padded_classes = torch.zeros((batch_size, max_objects))
-        padded_masks = None
-
-        H, W = images.shape[2:]  # Assume all images in batch have the same size
-
-        for i, res in enumerate(batch_results):
-            num_objects = res['num_objects'].item()
-            
-            if num_objects > 0:
-                padded_boxes[i, :num_objects] = res['boxes']
-                padded_centers[i, :num_objects] = res['centers']
-                padded_widths[i, :num_objects] = res['widths']
-                padded_heights[i, :num_objects] = res['heights']
-                padded_scores[i, :num_objects] = res['scores']
-                padded_classes[i, :num_objects] = res['classes']
-                
-                if res['masks'] is not None:
-                    if padded_masks is None:
-                        padded_masks = torch.zeros((batch_size, max_objects, H, W))
-                    padded_masks[i, :num_objects] = res['masks']
-        
-        if padded_masks is None:
-            padded_masks = torch.zeros((batch_size, max_objects, H, W))
-        
-        return {
-            'boxes': padded_boxes,
-            'centers': padded_centers,
-            'widths': padded_widths,
-            'heights': padded_heights,
-            'scores': padded_scores,
-            'classes': padded_classes,
-            'masks': padded_masks,
-            'num_objects': torch.tensor([res['num_objects'].item() for res in batch_results]),
-            'image_size': torch.tensor([H, W]),
-        }
 
     def _process_result(self, result: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """
@@ -172,11 +111,4 @@ if __name__ == "__main__":
     single_output = extractor.predict(single_image_tensor)
     print("Single image prediction result keys:")
     for key, value in single_output.items():
-        print(f"  {key}: {value.shape if isinstance(value, torch.Tensor) else value}")
-
-    batch_images = torch.rand(4, 3, 640, 640)
-    print("\nTesting batch image prediction...")
-    batch_output = extractor.predict_batch(batch_images)
-    print("Batch prediction result keys:")
-    for key, value in batch_output.items():
         print(f"  {key}: {value.shape if isinstance(value, torch.Tensor) else value}")

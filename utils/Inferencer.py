@@ -3,8 +3,9 @@ from PIL import Image
 import argparse
 
 from models.OneFormer_Extractor import OneFormer_Extractor
+from models.YOLO_Extractor import YOLO_Extractor
 from models.Logic_Tensor_Networks import Logic_Tensor_Networks
-from utils.Draw import draw_and_save_result  # Integrated function for drawing and saving
+from utils.Draw import draw_and_save_result
 
 class Inferencer:
     """
@@ -16,15 +17,20 @@ class Inferencer:
         predicate (str): The relationship predicate (e.g., "near").
         threshold (float): The confidence threshold for determining relationship existence (default: 0.7).
     """
-    def __init__(self, subj_class: str, obj_class: str, predicate: str, threshold=0.7):
+    def __init__(self, subj_class: str, obj_class: str, predicate: str, threshold=0.7, extractor="OneFormer"):
         self.subj_class = subj_class
         self.obj_class = obj_class
         self.predicate = predicate
         self.threshold = threshold
 
-        # Initialise the OneFormer extractor (only once)
-        self.extractor = OneFormer_Extractor()
-        self.labels_list = list(self.extractor.model.config.id2label.values())
+        # Initialise the extractor
+        if extractor == "OneFormer":
+            self.extractor = OneFormer_Extractor()
+        elif extractor == "YOLO":
+            self.extractor = YOLO_Extractor()
+        else:
+            raise ValueError(f"Invalid extractor type: {extractor}")
+        self.labels_list = list(self.extractor.labels.values())
 
     def inference_single(self, image: Image.Image) -> dict:
         """
