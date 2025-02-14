@@ -2,8 +2,8 @@
 # In this project, we use this TOML file for all the configurations.
 
 [Train]
-lr = 0.001
-epochs = 450
+lr = 0.01
+epochs = 1000
 batch_size = 65536
 
 [Trainer]

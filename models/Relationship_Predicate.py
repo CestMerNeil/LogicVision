@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import ltn
-from torch_genometric.nn import GCNConv
+from torch_geometric.nn import GCNConv
 import torch.nn.functional as F
 
 class BaseNet(nn.Module):
@@ -21,7 +21,7 @@ class BaseNet(nn.Module):
         obj = combined[:, self.input_dim:]
 
         outputs = []
-        edge_index = torch.tensor([0, 1], [1, 0], dtype=torch.long, device=subj.device)
+        edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long, device=subj.device)
 
         for i in range(combined.shape[0]):
             node_features = torch.stack([subj[i], obj[i]], dim=0)
@@ -152,16 +152,53 @@ class OnTopOf(ltn.Predicate):
         
 class Near(ltn.Predicate):
     def __init__(self, input_dim):
-        net = BaseNet(input_dim)
+        net = nn.Sequential(
+            # 第一层卷积：输入 (batch, 1, 2, input_dim)
+            # 使用 padding 保持宽度尽可能不变
+            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(2, 3), padding=(0, 1)),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Dropout(0.3),
+
+            # 第二层卷积：kernel_size=(1,2)
+            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(1, 2)),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Dropout(0.3),
+
+            # 第三层卷积：kernel_size=(1,2)
+            nn.Conv2d(in_channels=128, out_channels=64, kernel_size=(1, 2)),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Dropout(0.3),
+
+            # 新增第四层卷积
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(1, 2)),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Dropout(0.3),
+
+            # 新增第五层卷积
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(1, 2)),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Dropout(0.3),
+
+            # 使用自适应池化保证输出固定为 (1, 1)
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten(),  # 最终展平成 (batch, 64)
+            
+            nn.Linear(64, 64),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Linear(64, 1),
+            nn.Sigmoid()
+        )
         super().__init__(model=net)
         self.net = net
+        self.input_dim = input_dim
     
     def forward(self, subj: ltn.Variable, obj: ltn.Variable) -> torch.Tensor:
         device = next(self.net.parameters()).device
         subj_tensor = subj.value.to(device)
         obj_tensor = obj.value.to(device)
         combined = torch.cat([subj_tensor, obj_tensor], dim=-1)
-        return self.net(combined)
+        cnn_input = combined.view(-1, 1, 2, self.input_dim)
+        return self.net(cnn_input)
 
 class Under(ltn.Predicate):
     def __init__(self, input_dim):
