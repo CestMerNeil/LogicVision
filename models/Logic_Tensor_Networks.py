@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import ltn
 import tomllib
+import torch.optim as optim
 from models.Relationship_Predicate import In, On, NextTo, OnTopOf, Near, Under
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
@@ -127,6 +128,11 @@ class Logic_Tensor_Networks:
 
         loss_fn = nn.BCELoss()
         optimizer = torch.optim.AdamW(pred_net.parameters(), lr=lr)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=5)
+
+        patience = 100
+        best_val_loss = float("inf")
+        early_stopping_counter = 0
 
         for epoch in range(epochs):
             pred_net.train()
@@ -146,6 +152,12 @@ class Logic_Tensor_Networks:
 
                 optimizer.zero_grad()
                 loss.backward()
+                for name, param in pred_net.named_parameters():
+                    if param.grad is not None:
+                        grad_norm = param.grad.norm().item()
+                        print(f"Gradient norm for {name}: {grad_norm:.6f}")
+                    else:
+                        print(f"None gradient for {name}")
                 optimizer.step()
 
                 epoch_train_loss += loss.item()
@@ -180,6 +192,17 @@ class Logic_Tensor_Networks:
 
             avg_val_loss = epoch_val_loss / val_batches if val_batches > 0 else 0.0
             accuracy = correct / total if total > 0 else 0.0
+
+            scheduler.step(avg_val_loss)
+
+            if avg_val_loss < best_val_loss:
+                best_val_loss = avg_val_loss
+                early_stopping_counter = 0
+            else:
+                early_stopping_counter += 1
+                if early_stopping_counter >= patience:
+                    print(f"Early stopping at epoch {epoch+1}.")
+                    break
 
             if (epoch + 1) % 10 == 0 or epoch == 0:
                 print(f"Epoch {epoch+1}/{epochs}: Train Loss = {avg_train_loss:.4f}, Val Loss = {avg_val_loss:.4f}, Val Accuracy = {accuracy:.4f}")

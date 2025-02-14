@@ -1,38 +1,56 @@
 import torch
 import torch.nn as nn
 import ltn
-from torch_geometric.nn import GCNConv
-import torch.nn.functional as F
 
 class BaseNet(nn.Module):
-    def __init__(self, input_dim):
-        super(BaseNet, self).__init__()
+    def __init__(self, input_dim, d_model=64, nhead=4, num_layer=2, dropout=0.1):
+        super().__init__()
         self.input_dim = input_dim
-        self.fc_in = nn.Linear(input_dim, 128)
+        self.d_model = d_model
 
-        self.conv1 = GCNConv(128, 128)
-        self.conv2 = GCNConv(128, 64)
+        self.proj = nn.Linear(input_dim, d_model)
+        self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
+        self.pos_embedding = nn.Parameter(torch.randn(1, 3, d_model))
 
-        self.fc_out = nn.Linear(64 * 2, 1)
-        self.sigmoid = nn.Sigmoid()
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dim_feedforward=d_model * 2, dropout=dropout, batch_first=True
+        )
 
-    def forward(self, combined):
-        subj = combined[:, :self.input_dim]
-        obj = combined[:, self.input_dim:]
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layer)
 
-        outputs = []
-        edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long, device=subj.device)
+        self.fc = nn.Sequential(
+            nn.Linear(d_model, d_model),
+            nn.LeakyReLU(negative_slope=0.01),
+            nn.Dropout(dropout),
+            nn.Linear(d_model, 1),
+            nn.Sigmoid()
+        )
 
-        for i in range(combined.shape[0]):
-            node_features = torch.stack([subj[i], obj[i]], dim=0)
-            node_features = F.relu(self.fc_in(node_features))
-            node_features = F.relu(self.conv1(node_features, edge_index))
-            node_features = F.relu(self.conv2(node_features, edge_index))
-            combined_nodes = torch.cat([node_features[0], node_features[1]], dim=-1)
-            score = self.fc_out(combined_nodes)
-            outputs.append(score)
-        outputs = torch.stack(outputs, dim=0)
-        return self.sigmoid(outputs)
+    def forward(self, subj, obj):
+        batch_size = subj.size(0)
+        subj_emb = self.proj(subj).unsqueeze(1)
+        obj_emb = self.proj(obj).unsqueeze(1)
+
+        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
+        x = torch.cat([cls_tokens, subj_emb, obj_emb], dim=1)
+        x = x + self.pos_embedding
+        x = x.transpose(0, 1)
+        encoded = self.transformer_encoder(x)
+        cls_output = encoded[0]
+        out = self.fc(cls_output)
+        return out
+
+class LTNBaseNet(ltn.Predicate):
+    def __init__(self, input_dim, d_model=64, nhead=4, num_layer=2, dropout=0.1):
+        net = BaseNet(input_dim, d_model, nhead, num_layer, dropout)
+        super().__init__(model=net)
+        self.net = net
+
+    def forward(self, subj: ltn.Variable, obj: ltn.Variable) -> torch.Tensor:
+        device = next(self.net.parameters()).device
+        subj_tensor = subj.value.to(device)
+        obj_tensor = obj.value.to(device)
+        return self.net(subj_tensor, obj_tensor)
 
 class In(ltn.Predicate):
     def __init__(self, input_dim):
@@ -150,66 +168,11 @@ class OnTopOf(ltn.Predicate):
         combined = torch.cat([subj_tensor, obj_tensor], dim=-1).view(-1, 10)
         return self.net(combined)
         
-class Near(ltn.Predicate):
+class Near(LTNBaseNet):
     def __init__(self, input_dim):
-        net = nn.Sequential(
-            # 第一层卷积：输入 (batch, 1, 2, input_dim)
-            # 使用 padding 保持宽度尽可能不变
-            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(2, 3), padding=(0, 1)),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.3),
+        super().__init__(input_dim)
 
-            # 第二层卷积：kernel_size=(1,2)
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(1, 2)),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.3),
-
-            # 第三层卷积：kernel_size=(1,2)
-            nn.Conv2d(in_channels=128, out_channels=64, kernel_size=(1, 2)),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.3),
-
-            # 新增第四层卷积
-            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(1, 2)),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.3),
-
-            # 新增第五层卷积
-            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(1, 2)),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.3),
-
-            # 使用自适应池化保证输出固定为 (1, 1)
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Flatten(),  # 最终展平成 (batch, 64)
-            
-            nn.Linear(64, 64),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Linear(64, 1),
-            nn.Sigmoid()
-        )
-        super().__init__(model=net)
-        self.net = net
-        self.input_dim = input_dim
-    
-    def forward(self, subj: ltn.Variable, obj: ltn.Variable) -> torch.Tensor:
-        device = next(self.net.parameters()).device
-        subj_tensor = subj.value.to(device)
-        obj_tensor = obj.value.to(device)
-        combined = torch.cat([subj_tensor, obj_tensor], dim=-1)
-        cnn_input = combined.view(-1, 1, 2, self.input_dim)
-        return self.net(cnn_input)
-
-class Under(ltn.Predicate):
+class Under(LTNBaseNet):
     def __init__(self, input_dim):
-        net = BaseNet(input_dim)
-        super().__init__(model=net)
-        self.net = net
-
-    def forward(self, subj: ltn.Variable, obj: ltn.Variable) -> torch.Tensor:
-        device = next(self.net.parameters()).device
-        subj_tensor = subj.value.to(device)
-        obj_tensor = obj.value.to(device)
-        combined = torch.cat([subj_tensor, obj_tensor], dim=-1)
-        return self.net(combined)
+        super().__init__(input_dim)
 
