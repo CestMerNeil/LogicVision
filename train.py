@@ -10,10 +10,6 @@ def train():
     lr = config["Train"]["lr"]
 
     predicate = [
-        "in",
-        "on",
-        "next to",
-        "on top of",
         "near",
         "under"
     ]
