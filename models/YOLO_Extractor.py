@@ -1,24 +1,38 @@
-import torch
 import pprint
 import tomllib
 from typing import Dict, List, Union
 
+import torch
 from ultralytics import YOLO
 
-# Load configuration from the TOML file.
 with open("config.toml", "rb") as config_file:
     config = tomllib.load(config_file)
 
+
 class YOLO_Extractor:
+    """YOLO Extractor for object detection.
+
+    This class utilizes a YOLO model to perform object detection on input images.
+    It processes the raw model outputs to produce normalized bounding boxes and
+    other detection metrics.
+    """
+
     def __init__(self):
-        self.conf_threshold = config['YOLO_Extractor']['conf_threshold']
-        self.model = YOLO(config['YOLO_Extractor']['model_path'])
+        """Initializes the YOLO extractor.
+
+        Loads the model configuration, sets the confidence threshold, and
+        initializes the YOLO model along with class labels.
+        """
+        self.conf_threshold = config["YOLO_Extractor"]["conf_threshold"]
+        self.model = YOLO(config["YOLO_Extractor"]["model_path"])
         self.labels = self.model.names
         self.num_classes = len(self.labels)
 
     def extractor_summary(self):
-        """
-        Print the summary of the YOLO Extractor
+        """Prints a summary of the YOLO extractor.
+
+        Displays the model details, confidence threshold, class names, and the number
+        of classes.
         """
         print(f"Model Path: {self.model}")
         print(f"Confidence Threshold: {self.conf_threshold}")
@@ -27,27 +41,31 @@ class YOLO_Extractor:
 
     @torch.no_grad()
     def predict(self, image: torch.Tensor) -> Dict[str, torch.Tensor]:
-        """
-        Predict the image using the YOLO model
+        """Performs object detection on an input image.
 
         Args:
-            image (torch.Tensor): Image of shape (3, H, W)
-        
+            image (torch.Tensor): An image tensor of shape (3, H, W).
+
         Returns:
-            Dict[str, torch.Tensor]: Dictionary containing the results
+            Dict[str, torch.Tensor]: A dictionary containing processed detection results,
+            including normalized bounding boxes, centers, widths, heights, scores, classes,
+            masks, the number of detected objects, and the image size.
         """
         result = self.model.predict(image, conf=self.conf_threshold)
         return self._process_result(result[0])
 
-    def _process_result(self, result: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
-        """
-        Process the result of the YOLO model
+    def _process_result(
+        self, result: Dict[str, torch.Tensor]
+    ) -> Dict[str, torch.Tensor]:
+        """Processes raw model output to extract detection results.
 
         Args:
-            result (Dict[str, torch.Tensor]): Result of the YOLO model
-            
+            result (Dict[str, torch.Tensor]): The raw output from the YOLO model.
+
         Returns:
-            Dict[str, torch.Tensor]: Processed result
+            Dict[str, torch.Tensor]: A dictionary containing processed detection results with
+            keys 'boxes', 'centers', 'widths', 'heights', 'scores', 'classes', 'masks',
+            'num_objects', and 'image_size'.
         """
         H, W = result.orig_shape[:2]
 
@@ -68,7 +86,7 @@ class YOLO_Extractor:
             widths = norm_boxes[:, 2] - norm_boxes[:, 0]
             heights = norm_boxes[:, 3] - norm_boxes[:, 1]
 
-            if hasattr(result, 'masks') and result.masks is not None:
+            if hasattr(result, "masks") and result.masks is not None:
                 masks = torch.as_tensor(result.masks.data)
             else:
                 masks = torch.zeros((len(boxes), H, W))
@@ -83,19 +101,21 @@ class YOLO_Extractor:
             masks = torch.zeros((0, H, W))
 
         return {
-            'boxes': norm_boxes,
-            'centers': centers,
-            'widths': widths,
-            'heights': heights,
-            'scores': scores,
-            'classes': classes,
-            'masks': masks,
-            'num_objects': torch.tensor(len(boxes)),
-            'image_size': torch.tensor([H, W])
+            "boxes": norm_boxes,
+            "centers": centers,
+            "widths": widths,
+            "heights": heights,
+            "scores": scores,
+            "classes": classes,
+            "masks": masks,
+            "num_objects": torch.tensor(len(boxes)),
+            "image_size": torch.tensor([H, W]),
         }
+
 
 if __name__ == "__main__":
     import os
+
     import torch
 
     extractor = YOLO_Extractor()
