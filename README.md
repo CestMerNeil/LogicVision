@@ -78,7 +78,10 @@ analyzer.process_folder("input_images/")
 
 # Database
 The relationships and image metadata data from the [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) database were used to extract image information and feature pair information.
+
 ![Visual Genole Example](/README/images/Visual_Genome.png)
+
+
 The project extracts data and target locations from relational data, and extracts image data to normalize the target locations.
 
 # Code Style and Documentation

@@ -78,7 +78,9 @@ analyzer.process_folder("input_images/")
 
 # データベース
 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html)データベースの人間関係と画像メタデータデータを用いて、画像情報と特徴ペア情報を抽出した。
+
 ![Visual Genole の例](/README/images/Visual_Genome.png)
+
 このプロジェクトでは、リレーショナル データからデータとターゲットの場所を抽出し、イメージ データを抽出してターゲットの場所を正規化します。
 
 # コード スタイルとドキュメント

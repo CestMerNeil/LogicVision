@@ -78,7 +78,9 @@ analyzer.process_folder("input_images/")
 
 # 数据库
 使用 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) 数据库中的 relationships 和 image metadata 数据来提取图像信息及特征对信息。
+
 ![Visual Genole 示例](/README/images/Visual_Genome.png)
+
 该项目从关系数据中提取数据和目标位置，并提取图像数据以规范化目标位置。
 
 # 代码风格和文档
