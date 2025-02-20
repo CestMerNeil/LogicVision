@@ -94,5 +94,5 @@ black . && isort .
 このプロジェクトは [LTNTorch](https://github.com/tommasocarraro/LTNtorch) プロジェクトに基づいており、データ抽出に [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) データベースを使用します。このプロジェクトでは、オブジェクトの検出とセグメンテーションに [YOLO](https://doc.ultralytics.com) および [OneFormer](https://www.shi-labs.com) モデルを使用します。
 
 # ライセンス
-このプロジェクトは GNU3.0 ライセンスの下でライセンスされています。詳細については、[LICENSE](LICENSE) ファイルを参照してください。
+このプロジェクトは GNU3.0 ライセンスの下でライセンスされています。詳細については、[LICENSE](/LICENSE) ファイルを参照してください。
 ---

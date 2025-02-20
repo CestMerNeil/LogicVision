@@ -81,7 +81,7 @@ analyzer.process_folder("input_images/")
 
 ![Visual Genole 示例](/README/images/Visual_Genome.png)
 
-该项目从关系数据中提取数据和目标位置，并提取图像数据以规范化目标位置。
+该项目从关系数据中提取数据和目标位置，并提取图像数据以进行归一化。
 
 # 代码风格和文档
 项目使用 ```black```和 ```isort``` 自动强制执行一致的代码风格。所有代码注释和文档均遵循 [Google Python 风格指南](https://google.github.io/styleguide/) 以保持清晰度和一致性。
@@ -94,6 +94,6 @@ black . && isort .
 该项目基于 [LTNTorch](https://github.com/tommasocarraro/LTNtorch) 项目，并使用 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) 数据库进行数据提取。该项目使用 [YOLO](https://doc.ultralytics.com) 和 [OneFormer](https://www.shi-labs.com) 模型进行对象检测和分割。
 
 # 许可证
-该项目根据 GNU3.0 许可证获得许可 - 有关详细信息，请参阅 [LICENSE](LICENSE) 文件。
+该项目根据 GNU3.0 许可证获得许可 - 有关详细信息，请参阅 [LICENSE](/LICENSE) 文件。
 ---
 

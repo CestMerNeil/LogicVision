@@ -95,5 +95,5 @@ black . && isort .
 This project is based on the [LTNTorch](https://github.com/tommasocarraro/LTNtorch) project and uses the [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) database for data extraction. The project uses the [YOLO](https://doc.ultralytics.com) and [OneFormer](https://www.shi-labs.com) models for object detection and segmentation.
 
 # License
-This project is licensed under the GNU3.0 License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU3.0 License - see the [LICENSE](/LICENSE) file for details.
 ---
