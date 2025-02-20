@@ -18,7 +18,7 @@ Ce projet combine un modèle de segmentation et un réseau tensoriel logique pou
 
 ## Architecture technique
 
-1. **Segmentation et extraction de caractéristiques** : utilisation de YOLOv8 / OneFormer
+1. **Segmentation et extraction de caractéristiques** : en utilisant le formulaire YOLO [UltraLytics](https://docs.ultralytics.com) et le formulaire OneFormer [SHI-Labs](https://www.shi-labs.com)
 2. **Criblage des objets** : conservation des objets présentant un intérêt
 3. **Génération de tenseurs logiques** : produit cartésien de paires d'objets pour générer un tenseur logique
 4. **Raisonnement logique** : raisonnement par prédicats relationnels à l'aide du tenseur logique
@@ -78,5 +78,20 @@ analyzer.process_folder("input_images/")
 
 # Base de données
 Les relations et les métadonnées des images de la base de données [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) ont été utilisées pour extraire les informations sur les images et les paires de caractéristiques. ont été utilisées pour extraire des informations sur les images et des informations sur les paires de caractéristiques.
+![Visual Genole Example](/README/images/Visual_Genome.png)
+The project extracts data and target locations from relational data, and extracts image data to normalize the target locations.
 
+# Code Style and Documentation
+This project uses the ```black``` and ```isort``` to automatically enforce a consistent code style. All code comments and documentation follow the [Google Python Style Guide](https://google.github.io/styleguide/) to maintain clarity and consistency.
+
+
+Use the following command to keep the code in the same format before submitting.
+```bash
+black . && isort .
+```
+# Acknowledgements
+This project is based on the [LTNTorch](https://github.com/tommasocarraro/LTNtorch) project and uses the [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) database for data extraction. The project uses the [YOLO](https://doc.ultralytics.com) and [OneFormer](https://www.shi-labs.com) models for object detection and segmentation.
+
+# License
+This project is licensed under the GNU3.0 License - see the [LICENSE](LICENSE) file for details.
 ---

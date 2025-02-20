@@ -18,7 +18,7 @@ This project combines segmentation model and logic tensor network to realize the
 
 ## Technical architecture
 
-1. **Segmentation and feature extraction**: using YOLOv8 / OneFormer
+1. **Segmentation and feature extraction**: using YOLO form [UltraLytics](https://docs.ultralytics.com) and OneFormer form [SHI-Labs](https://www.shi-labs.com)
 2. **Screening of objects**: retention of objects of interest
 3. **Logic tensor generation**: Cartesian product of pairs of objects to generate a logic tensor
 4. **Logical reasoning**: relational predicate reasoning using the logic tensor
@@ -78,5 +78,20 @@ analyzer.process_folder("input_images/")
 
 # Database
 The relationships and image metadata data from the [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) database were used to extract image information and feature pair information.
+![Visual Genole Example](/README/images/Visual_Genome.png)
+The project extracts data and target locations from relational data, and extracts image data to normalize the target locations.
 
+# Code Style and Documentation
+This project uses the ```black``` and ```isort``` to automatically enforce a consistent code style. All code comments and documentation follow the [Google Python Style Guide](https://google.github.io/styleguide/) to maintain clarity and consistency.
+
+
+Use the following command to keep the code in the same format before submitting.
+```bash
+black . && isort . 
+```
+# Acknowledgements
+This project is based on the [LTNTorch](https://github.com/tommasocarraro/LTNtorch) project and uses the [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) database for data extraction. The project uses the [YOLO](https://doc.ultralytics.com) and [OneFormer](https://www.shi-labs.com) models for object detection and segmentation.
+
+# License
+This project is licensed under the GNU3.0 License - see the [LICENSE](LICENSE) file for details.
 ---

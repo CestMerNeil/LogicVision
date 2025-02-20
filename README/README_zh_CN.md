@@ -18,7 +18,7 @@
 
 ## 技术架构
 
-1. **分割与特征提取**：使用 YOLOv8 / OneFormer  
+1. **分割与特征提取**：使用来自 [UltraLytics](https://docs.ultralytics.com) 的 YOLO 和来自 [SHI-Labs](https://www.shi-labs.com) 的 OneFormer
 2. **物体筛选**：保留感兴趣的物体  
 3. **逻辑张量生成**：对物体对进行笛卡尔积生成逻辑张量  
 4. **逻辑推理**：利用逻辑张量进行关系谓词推理  
@@ -78,6 +78,20 @@ analyzer.process_folder("input_images/")
 
 # 数据库
 使用 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) 数据库中的 relationships 和 image metadata 数据来提取图像信息及特征对信息。
+![Visual Genole 示例](/README/images/Visual_Genome.png)
+该项目从关系数据中提取数据和目标位置，并提取图像数据以规范化目标位置。
 
+# 代码风格和文档
+项目使用 ```black```和 ```isort``` 自动强制执行一致的代码风格。所有代码注释和文档均遵循 [Google Python 风格指南](https://google.github.io/styleguide/) 以保持清晰度和一致性。
+
+在提交之前，使用以下命令使代码保持相同的格式。
+```bash
+black . && isort .
+```
+# 致谢
+该项目基于 [LTNTorch](https://github.com/tommasocarraro/LTNtorch) 项目，并使用 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) 数据库进行数据提取。该项目使用 [YOLO](https://doc.ultralytics.com) 和 [OneFormer](https://www.shi-labs.com) 模型进行对象检测和分割。
+
+# 许可证
+该项目根据 GNU3.0 许可证获得许可 - 有关详细信息，请参阅 [LICENSE](LICENSE) 文件。
 ---
 

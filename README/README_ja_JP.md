@@ -18,7 +18,7 @@
 
 ## テクニカルアーキテクチャ
 
-1. **セグメンテーションと特徴抽出**：YOLOv8 / OneFormerを使用
+1. **セグメンテーションと特徴抽出**：YOLO フォーム [UltraLytics](https://docs.ultralytics.com) と OneFormer フォーム [SHI-Labs](https://www.shi-labs.com) を使用
 2. **対象物のスクリーニング**：関心のある対象物の保持
 3. **論理テンソルの生成**：オブジェクトのペアのデカルト積で論理テンソルを生成する
 4. **論理的推論**：論理テンソルを使った関係述語推論
@@ -78,5 +78,19 @@ analyzer.process_folder("input_images/")
 
 # データベース
 [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html)データベースの人間関係と画像メタデータデータを用いて、画像情報と特徴ペア情報を抽出した。
+![Visual Genole の例](/README/images/Visual_Genome.png)
+このプロジェクトでは、リレーショナル データからデータとターゲットの場所を抽出し、イメージ データを抽出してターゲットの場所を正規化します。
 
+# コード スタイルとドキュメント
+このプロジェクトでは、'```black``` と ```isort``` を使用して、一貫したコード スタイルを自動的に適用します。すべてのコード コメントとドキュメントは、[Google Python スタイル ガイド](https://google.github.io/styleguide/) に従って、明瞭性と一貫性を維持します。
+
+送信前にコードを同じ形式に保つには、次のコマンドを使用します。
+```bash
+black . && isort .
+```
+# 謝辞
+このプロジェクトは [LTNTorch](https://github.com/tommasocarraro/LTNtorch) プロジェクトに基づいており、データ抽出に [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/api_beginners_tutorial.html) データベースを使用します。このプロジェクトでは、オブジェクトの検出とセグメンテーションに [YOLO](https://doc.ultralytics.com) および [OneFormer](https://www.shi-labs.com) モデルを使用します。
+
+# ライセンス
+このプロジェクトは GNU3.0 ライセンスの下でライセンスされています。詳細については、[LICENSE](LICENSE) ファイルを参照してください。
 ---
