@@ -16,7 +16,8 @@
 
 ---
 
-## 技术架构
+## 整体架构与模块划分
+![整体架构](/README/images/Architecture.png)
 
 1. **分割与特征提取**：使用来自 [UltraLytics](https://docs.ultralytics.com) 的 YOLO 和来自 [SHI-Labs](https://www.shi-labs.com) 的 OneFormer
 2. **物体筛选**：保留感兴趣的物体  
