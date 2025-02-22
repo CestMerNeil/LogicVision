@@ -26,7 +26,7 @@ class RelationshipDataset(Dataset):
         relationships_json_path,
         image_meta_json_path,
         pos_predicate,
-        use_cuda=True,
+        use_cuda=False,
     ):
         """Initializes the RelationshipDataset and processes the data in parallel."""
         self.samples = []
