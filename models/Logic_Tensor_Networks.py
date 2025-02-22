@@ -1,3 +1,4 @@
+import json
 import tomllib
 
 import ltn
@@ -222,6 +223,8 @@ class Logic_Tensor_Networks:
         loss_fn = nn.BCELoss()
         optimizer = torch.optim.AdamW(pred_net.parameters(), lr=lr)
 
+        training_log = []
+
         for epoch in range(epochs):
             pred_net.train()
             epoch_train_loss = 0.0
@@ -277,6 +280,14 @@ class Logic_Tensor_Networks:
             avg_val_loss = epoch_val_loss / val_batches if val_batches > 0 else 0.0
             accuracy = correct / total if total > 0 else 0.0
 
+            epoch_log = {
+                "epoch": epoch + 1,
+                "train_loss": avg_train_loss,
+                "val_loss": avg_val_loss,
+                "val_accuracy": accuracy,
+            }
+            training_log.append(epoch_log)
+
             if (epoch + 1) % 10 == 0 or epoch == 0:
                 print(
                     f"Epoch {epoch+1}/{epochs}: Train Loss = {avg_train_loss:.4f}, Val Loss = {avg_val_loss:.4f}, Val Accuracy = {accuracy:.4f}"
@@ -286,7 +297,10 @@ class Logic_Tensor_Networks:
 
         os.makedirs("weights", exist_ok=True)
         weight_path = f"weights/{predicate_name_lower}_predicate_weights.pth"
+        log_path = f"weights/{predicate_name_lower}_training_log.json"
         torch.save(pred_net.model.state_dict(), weight_path)
+        with open(log_path, "w") as f:
+            json.dump(training_log, f, indent=4)
         print(f"Saved {predicate_name} predicate weights to '{weight_path}'.")
 
     def inference(
