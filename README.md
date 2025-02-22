@@ -17,7 +17,7 @@ This project combines segmentation model and logic tensor network to realize the
 ---
 
 ## Overall architecture and module division
-! [Overall Architecture](/README/images/Architecture.png)
+![Overall Architecture](/README/images/Architecture.png)
 
 1. **✨ Image segmentation and feature extraction**: The YOLO-Seg model from [UltraLytics](https://docs.ultralytics.com) or the OneFormer model from [SHI-Labs](https://www.shi-labs.com) is used to segment and extract features from the input image. image for segmentation and feature extraction.
 2. **✨Goal relation detection**: using a logic tensor network from [LTNTorch](https://github.com/tommasocarraro/LTNtorch), each goal is converted into a logical predicate, which is then reasoned over by the logic tensor network.

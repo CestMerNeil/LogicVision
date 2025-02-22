@@ -17,7 +17,7 @@ Ce projet combine un modèle de segmentation et un réseau tensoriel logique pou
 ---
 
 ## Architecture générale et répartition des modules
-! [Architecture générale](/README/images/Architecture.png)
+![Architecture générale](/README/images/Architecture.png)
 
 1) **✨ Segmentation de l'image et extraction des caractéristiques** : Le modèle YOLO-Seg de [UltraLytics](https://docs.ultralytics.com) ou le modèle OneFormer de [SHI-Labs](https://www.shi-labs.com) est utilisé pour la segmentation de l'image d'entrée et l'extraction des caractéristiques. L'image d'entrée est utilisée pour la segmentation et l'extraction des caractéristiques.
 2. **✨Goal relation detection** : En utilisant un réseau tensoriel logique de [LTNTorch](https://github.com/tommasocarraro/LTNtorch), chaque objectif est converti en un prédicat logique, qui est ensuite raisonné par le réseau tensoriel logique.
