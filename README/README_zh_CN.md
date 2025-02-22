@@ -19,11 +19,11 @@
 ## 整体架构与模块划分
 ![整体架构](/README/images/Architecture.png)
 
-1. **分割与特征提取**：使用来自 [UltraLytics](https://docs.ultralytics.com) 的 YOLO 和来自 [SHI-Labs](https://www.shi-labs.com) 的 OneFormer
-2. **物体筛选**：保留感兴趣的物体  
-3. **逻辑张量生成**：对物体对进行笛卡尔积生成逻辑张量  
-4. **逻辑推理**：利用逻辑张量进行关系谓词推理  
-5. **结果输出**：输出推理结果
+1. **✨图像分割与特征提取**：使用来自 [UltraLytics](https://docs.ultralytics.com) 的YOLO-Seg模型或来自 [SHI-Labs](https://www.shi-labs.com) 的 OneFormer模型对于输入图像进行分割和特征提取。
+2. **✨目标关系检测**：使用来自[LTNTorch](https://github.com/tommasocarraro/LTNtorch)的逻辑张量网络，将每一个目标转换为一个逻辑谓词，然后通过逻辑张量网络进行推理。
+3. **✨逻辑关系训练**：使用[Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html)数据库中的关系数据对逻辑张量网络进行训练。
+4. **✨推理结果输出**：使用三元组的形式读取用户查找的关系，输出推理结果。
+
 
 
 ## 安装指南

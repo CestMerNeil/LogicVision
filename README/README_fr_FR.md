@@ -3,7 +3,7 @@
 [![中文](https://cdn3.iconfinder.com/data/icons/142-mini-country-flags-16x16px/32/flag-china2x.png)](/README/README_zh_CN.md)
 [![日本語](https://cdn3.iconfinder.com/data/icons/142-mini-country-flags-16x16px/32/flag-japan2x.png)](/README/README_ja_JP.md)
 
-# Comprendre les scènes visuelles à l'aide de réseaux de neurones à tenseur logistique 🚀🤖🤖
+# Comprendre les scènes visuelles à l'aide de réseaux de neurones à tenseur logistique 🚀🤖
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=flat-square)](https://www.python.org)
 [![CUDA 12.4](https://img.shields.io/badge/CUDA-12.4-red?style=flat-square)](https://developer.nvidia.com/cuda-toolkit)
@@ -16,13 +16,13 @@ Ce projet combine un modèle de segmentation et un réseau tensoriel logique pou
 
 ---
 
-## Architecture technique
+## Architecture générale et répartition des modules
+! [Architecture générale](/README/images/Architecture.png)
 
-1. **Segmentation et extraction de caractéristiques** : en utilisant le formulaire YOLO [UltraLytics](https://docs.ultralytics.com) et le formulaire OneFormer [SHI-Labs](https://www.shi-labs.com)
-2. **Criblage des objets** : conservation des objets présentant un intérêt
-3. **Génération de tenseurs logiques** : produit cartésien de paires d'objets pour générer un tenseur logique
-4. **Raisonnement logique** : raisonnement par prédicats relationnels à l'aide du tenseur logique
-5) **Sortie des résultats** : sortie des résultats du raisonnement
+1) **✨ Segmentation de l'image et extraction des caractéristiques** : Le modèle YOLO-Seg de [UltraLytics](https://docs.ultralytics.com) ou le modèle OneFormer de [SHI-Labs](https://www.shi-labs.com) est utilisé pour la segmentation de l'image d'entrée et l'extraction des caractéristiques. L'image d'entrée est utilisée pour la segmentation et l'extraction des caractéristiques.
+2. **✨Goal relation detection** : En utilisant un réseau tensoriel logique de [LTNTorch](https://github.com/tommasocarraro/LTNtorch), chaque objectif est converti en un prédicat logique, qui est ensuite raisonné par le réseau tensoriel logique.
+3) **✨Logical Relationship Training** : Les réseaux de tenseurs logistiques ont été entraînés à l'aide de données relationnelles provenant de la base de données [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html).
+4. **✨ Sortie des résultats du raisonnement** : lit les relations trouvées par l'utilisateur en utilisant la forme d'un ternaire et sort les résultats du raisonnement.
 
 
 ## Guide d'installation

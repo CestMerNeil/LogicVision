@@ -16,13 +16,13 @@
 
 ---
 
-## テクニカルアーキテクチャ
+## 全体的なアーキテクチャとモジュール分割
+![全体アーキテクチャ](/README/images/Architecture.png)
 
-1. **セグメンテーションと特徴抽出**：YOLO フォーム [UltraLytics](https://docs.ultralytics.com) と OneFormer フォーム [SHI-Labs](https://www.shi-labs.com) を使用
-2. **対象物のスクリーニング**：関心のある対象物の保持
-3. **論理テンソルの生成**：オブジェクトのペアのデカルト積で論理テンソルを生成する
-4. **論理的推論**：論理テンソルを使った関係述語推論
-5. **結果出力**：推論結果の出力
+1. **✨ 画像のセグメンテーションと特徴抽出**: 入力画像のセグメンテーションと特徴抽出には、[UltraLytics](https://docs.ultralytics.com)のYOLO-Segモデル、または[SHI-Labs](https://www.shi-labs.com)のOneFormerモデルを使用します。セグメンテーションと特徴抽出のための画像
+2. **✨ゴール関係検出**: [LTNTorch](https://github.com/tommasocarraro/LTNtorch)の論理テンソルネットワークを用いて、各ゴールを論理述語に変換し、論理テンソルネットワークで推論する。
+3. **✨論理関係学習**：[Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html)データベースの関係データを用いてロジスティックテンソルネットワークを学習した。
+4. **✨ 推論結果の出力**: ユーザーが見つけた関係を三項形式で読み取り、推論結果を出力します。
 
 
 ## インストレーションガイド

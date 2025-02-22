@@ -16,13 +16,13 @@ This project combines segmentation model and logic tensor network to realize the
 
 ---
 
-## Technical architecture
+## Overall architecture and module division
+! [Overall Architecture](/README/images/Architecture.png)
 
-1. **Segmentation and feature extraction**: using YOLO form [UltraLytics](https://docs.ultralytics.com) and OneFormer form [SHI-Labs](https://www.shi-labs.com)
-2. **Screening of objects**: retention of objects of interest
-3. **Logic tensor generation**: Cartesian product of pairs of objects to generate a logic tensor
-4. **Logical reasoning**: relational predicate reasoning using the logic tensor
-5. **Output of results**: output of reasoning results
+1. **✨ Image segmentation and feature extraction**: The YOLO-Seg model from [UltraLytics](https://docs.ultralytics.com) or the OneFormer model from [SHI-Labs](https://www.shi-labs.com) is used to segment and extract features from the input image. image for segmentation and feature extraction.
+2. **✨Goal relation detection**: using a logic tensor network from [LTNTorch](https://github.com/tommasocarraro/LTNtorch), each goal is converted into a logical predicate, which is then reasoned over by the logic tensor network.
+3. **✨Logical Relationship Training**: Logistic tensor networks were trained using relational data from the [Visual Genome](https://homes.cs.washington.edu/~ranjay/visualgenome/index.html) database.
+4. **✨ Output of reasoning results**: reads the relations found by the user using the form of a ternary and outputs the results of the reasoning.
 
 
 ## Installation Guide
