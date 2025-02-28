@@ -77,7 +77,7 @@ def train_combined():
             relationships_json_path=relationships_path,
             image_meta_json_path=image_meta_path,
             pos_predicate=pred,
-            neg_predicates=neg_predicates,
+            # neg_predicates=neg_predicates,
         )
 
     # Create training and validation data loaders with optimizations
