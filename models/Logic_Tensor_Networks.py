@@ -1,5 +1,6 @@
 import json
 import tomllib
+import logging
 
 import ltn
 import torch
@@ -9,6 +10,12 @@ from tqdm import tqdm
 
 from models.Relationship_Predicate import In, Near, NextTo, On, OnTopOf, Under
 
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger("LogicVision")
 
 def auto_select_device() -> torch.device:
     """Select an available device for PyTorch operations.
@@ -177,6 +184,16 @@ class Logic_Tensor_Networks:
         batch_size: int,
         lr: float,
         val_split: float = 0.2,
+        early_stopping: bool = True,
+        patience: int = 10,
+        monitor: str = "val_loss",
+        min_delta: float = 0.001,
+        restore_best_weights: bool = True,
+        lr_scheduler: bool = True,
+        lr_factor: float = 0.5,
+        lr_patience: int = 5,
+        lr_min: float = 1e-6,
+        log_dir: str = "logs",
     ):
         """Train a predicate network.
 
@@ -187,11 +204,37 @@ class Logic_Tensor_Networks:
             batch_size (int): Batch size for training.
             lr (float): Learning rate for the optimizer.
             val_split (float, optional): Fraction of data to use for validation. Defaults to 0.2.
+            early_stopping (bool, optional): Whether to use early stopping. Defaults to True.
+            patience (int, optional): Number of epochs to wait for improvement before stopping. Defaults to 10.
+            monitor (str, optional): Metric to monitor ('val_loss' or 'val_accuracy'). Defaults to "val_loss".
+            min_delta (float, optional): Minimum change to qualify as improvement. Defaults to 0.001.
+            restore_best_weights (bool, optional): Whether to restore model to best weights. Defaults to True.
+            lr_scheduler (bool, optional): Whether to use learning rate scheduler. Defaults to True.
+            lr_factor (float, optional): Factor by which to reduce learning rate. Defaults to 0.5.
+            lr_patience (int, optional): Epochs to wait before reducing learning rate. Defaults to 5.
+            lr_min (float, optional): Minimum learning rate. Defaults to 1e-6.
+            log_dir (str, optional): Directory to store log files. Defaults to "logs".
 
         Raises:
-            ValueError: If an invalid predicate_name is provided.
+            ValueError: If an invalid predicate_name or monitor is provided.
         """
+        import os
+        from datetime import datetime
+        
         predicate_name_lower = predicate_name.lower()
+        
+        # 确保日志目录存在
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # 设置日志文件
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = os.path.join(log_dir, f"{predicate_name_lower}_training_{timestamp}.log")
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logger.addHandler(file_handler)
+        
+        logger.info(f"Starting training for predicate: {predicate_name}")
+        
         if predicate_name_lower == "in":
             pred_net = self.in_predicate
         elif predicate_name_lower == "on":
@@ -205,15 +248,22 @@ class Logic_Tensor_Networks:
         elif predicate_name_lower == "under":
             pred_net = self.under_predicate
         else:
+            logger.error(f"Invalid predicate: {predicate_name}")
             raise ValueError(f"Invalid predicate: {predicate_name}")
-
+        
+        # 验证监控参数
+        if monitor not in ["val_loss", "val_accuracy"]:
+            logger.error(f"Invalid monitor: {monitor}. Must be 'val_loss' or 'val_accuracy'")
+            raise ValueError(f"Invalid monitor: {monitor}. Must be 'val_loss' or 'val_accuracy'")
+        
+        # 准备数据
         total_size = len(full_data)
         val_size = int(val_split * total_size)
         train_size = total_size - val_size
         train_dataset, val_dataset = torch.utils.data.random_split(
             full_data, [train_size, val_size]
         )
-        print(
+        logger.info(
             f"Total samples: {total_size}, Training samples: {train_size}, Validation samples: {val_size}"
         )
 
@@ -222,9 +272,28 @@ class Logic_Tensor_Networks:
 
         loss_fn = nn.BCELoss()
         optimizer = torch.optim.AdamW(pred_net.parameters(), lr=lr)
+        
+        # 设置学习率调度器
+        scheduler = None
+        if lr_scheduler:
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, 
+                mode='min' if monitor == 'val_loss' else 'max',
+                factor=lr_factor,
+                patience=lr_patience,
+                verbose=False,
+                min_lr=lr_min
+            )
+            logger.info(f"Using learning rate scheduler: factor={lr_factor}, patience={lr_patience}, min_lr={lr_min}")
 
         training_log = []
-
+        
+        # 早停变量
+        best_metric = float('inf') if monitor == 'val_loss' else -float('inf')
+        best_epoch = 0
+        wait = 0
+        best_state_dict = None
+        
         for epoch in range(epochs):
             pred_net.train()
             epoch_train_loss = 0.0
@@ -280,28 +349,106 @@ class Logic_Tensor_Networks:
             avg_val_loss = epoch_val_loss / val_batches if val_batches > 0 else 0.0
             accuracy = correct / total if total > 0 else 0.0
 
+            # 更新学习率调度器
+            if scheduler is not None:
+                metric_for_scheduler = avg_val_loss if monitor == 'val_loss' else -accuracy
+                scheduler.step(metric_for_scheduler)
+                current_lr = optimizer.param_groups[0]['lr']
+                if current_lr != lr:
+                    logger.info(f"Learning rate adjusted to {current_lr:.6f}")
+            else:
+                current_lr = lr
+
             epoch_log = {
                 "epoch": epoch + 1,
                 "train_loss": avg_train_loss,
                 "val_loss": avg_val_loss,
                 "val_accuracy": accuracy,
+                "learning_rate": current_lr
             }
             training_log.append(epoch_log)
 
             if (epoch + 1) % 10 == 0 or epoch == 0:
-                print(
-                    f"Epoch {epoch+1}/{epochs}: Train Loss = {avg_train_loss:.4f}, Val Loss = {avg_val_loss:.4f}, Val Accuracy = {accuracy:.4f}"
+                logger.info(
+                    f"Epoch {epoch+1}/{epochs}: Train Loss = {avg_train_loss:.4f}, Val Loss = {avg_val_loss:.4f}, "
+                    f"Val Accuracy = {accuracy:.4f}, LR = {current_lr:.6f}"
                 )
+            
+            # 早停逻辑
+            if early_stopping:
+                current_metric = avg_val_loss if monitor == 'val_loss' else accuracy
+                improved = False
+                
+                if monitor == 'val_loss':
+                    improved = current_metric < best_metric - min_delta
+                else:  # val_accuracy
+                    improved = current_metric > best_metric + min_delta
+                
+                if improved:
+                    best_metric = current_metric
+                    best_epoch = epoch
+                    wait = 0
+                    logger.info(f"Improvement detected! Best {monitor} so far: {best_metric:.4f}")
+                    
+                    if restore_best_weights:
+                        # 深复制模型权重
+                        best_state_dict = {k: v.cpu().clone() for k, v in pred_net.model.state_dict().items()}
+                else:
+                    wait += 1
+                    if wait >= patience:
+                        logger.info(f"\nEarly stopping triggered! No improvement in {patience} epochs.")
+                        logger.info(f"Best {monitor} = {best_metric:.4f} at epoch {best_epoch+1}")
+                        
+                        # 恢复最佳权重
+                        if restore_best_weights and best_state_dict:
+                            pred_net.model.load_state_dict({k: v.to(self.device) for k, v in best_state_dict.items()})
+                            logger.info(f"Restored model weights from epoch {best_epoch+1}")
+                        
+                        break
 
-        import os
-
-        os.makedirs("weights", exist_ok=True)
-        weight_path = f"weights/{predicate_name_lower}_predicate_weights.pth"
-        log_path = f"weights/{predicate_name_lower}_training_log.json"
-        torch.save(pred_net.model.state_dict(), weight_path)
-        with open(log_path, "w") as f:
-            json.dump(training_log, f, indent=4)
-        print(f"Saved {predicate_name} predicate weights to '{weight_path}'.")
+            # 确保weights目录存在（仅用于保存模型权重）
+            os.makedirs("weights", exist_ok=True)
+            # 确保日志目录存在（用于保存训练日志JSON）
+            os.makedirs(log_dir, exist_ok=True)
+            
+            # 权重文件仍保存在weights目录
+            weight_path = f"weights/{predicate_name_lower}_predicate_weights.pth"
+            # 训练日志JSON保存到log_dir目录
+            log_path = f"{log_dir}/{predicate_name_lower}_training_log_{timestamp}.json"
+            
+            torch.save(pred_net.model.state_dict(), weight_path)
+            
+            # 添加训练元数据
+            metadata = {
+                "training_metadata": {
+                    "early_stopping": {
+                        "enabled": early_stopping,
+                        "monitor": monitor,
+                        "min_delta": min_delta,
+                        "patience": patience,
+                        "best_epoch": best_epoch + 1,
+                        "best_metric": float(best_metric),
+                        "stopped_epoch": epoch + 1
+                    },
+                    "lr_scheduler": {
+                        "enabled": lr_scheduler,
+                        "factor": lr_factor,
+                        "patience": lr_patience,
+                        "min_lr": lr_min,
+                        "initial_lr": lr,
+                        "final_lr": current_lr
+                    }
+                }
+            }
+            training_log.append(metadata)
+            
+            with open(log_path, "w") as f:
+                json.dump(training_log, f, indent=4)
+            logger.info(f"Saved {predicate_name} predicate weights to '{weight_path}'")
+            logger.info(f"Saved training log to '{log_path}'")
+            
+            # 移除文件处理器，避免多次添加
+            logger.removeHandler(file_handler)
 
     def inference(
         self, subj_class: str, obj_class: str, predicate: str, threshold=0.7
