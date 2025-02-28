@@ -30,7 +30,7 @@ def train_combined():
     predicates = ["in", "on", "next to", "on top of", "near", "under"]
 
     # Setup mixed precision training
-    scaler = torch.cuda.amp.GradScaler()
+    scaler = torch.amp.GradScaler('cuda')
 
     # Create dummy detector output for LTN initialization
     num_obj = 10
