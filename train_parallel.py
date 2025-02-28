@@ -52,14 +52,14 @@ def train_combined():
     pred_networks = {
         "in": ltn_network.in_predicate,
         "on": ltn_network.on_predicate,
-        "next to": ltn_network.next_to_predicate,
-        "on top of": ltn_network.on_top_of_predicate,
-        "near": ltn_network.near_predicate,
-        "under": ltn_network.under_predicate,
+        #"next to": ltn_network.next_to_predicate,
+        #"on top of": ltn_network.on_top_of_predicate,
+        #"near": ltn_network.near_predicate,
+        #"under": ltn_network.under_predicate,
     }
 
     # Create loss functions and optimizers for each predicate
-    loss_fn = nn.BCELoss()
+    loss_fn = nn.BCEWithLogitsLoss()
     optimizers = {
         pred: torch.optim.AdamW(pred_networks[pred].parameters(), lr=lr)
         for pred in predicates
@@ -162,12 +162,16 @@ def train_combined():
                         labels.view(-1, 1).float().to(device, non_blocking=True),
                     )
 
+                    subj_obj = ltn.Variable("subj", subj_features)
+                    obj_obj = ltn.Variable("obj", obj_features)
+
                     outputs = pred_networks[pred](subj_obj, obj_obj)
                     loss = loss_fn(outputs, labels)
                     epoch_val_loss += loss.item()
                     val_batches += 1
 
-                    preds = (outputs >= 0.5).float()
+                    probs = torch.sigmoid(outputs)
+                    preds = (probs >= 0.5).float()
                     correct += (preds == labels).sum().item()
                     total += labels.size(0)
 
