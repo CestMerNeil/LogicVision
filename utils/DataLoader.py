@@ -26,14 +26,10 @@ class RelationshipDataset(Dataset):
         relationships_json_path,
         image_meta_json_path,
         pos_predicate,
-        use_cuda=False,
     ):
         """Initializes the RelationshipDataset and processes the data in parallel."""
         self.samples = []
         self.pos_predicate = pos_predicate.lower()
-        self.device = torch.device(
-            "cuda" if use_cuda and torch.cuda.is_available() else "cpu"
-        )
 
         def chunked_json_loader(path, chunk_size=1000):
             """Loads JSON data from a file in chunks.
