@@ -1,155 +1,162 @@
 import json
 import random
-from concurrent.futures import ThreadPoolExecutor
-
+import os
+import pickle
+from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-
 class RelationshipDataset(Dataset):
-    """A PyTorch dataset for image relationship data.
-
-    This dataset loads relationship data and corresponding image metadata from JSON files.
-    It processes the data to generate positive and negative samples based on a specified predicate.
-
-    Args:
-        relationships_json_path (str): Path to the JSON file containing relationship data.
-        image_meta_json_path (str): Path to the JSON file containing image metadata.
-        pos_predicate (str): Predicate used to identify positive relationships.
-        use_cuda (bool, optional): Whether to use CUDA if available. Defaults to True.
-    """
+    """A PyTorch dataset for image relationship data with performance optimizations."""
 
     def __init__(
         self,
         relationships_json_path,
         image_meta_json_path,
         pos_predicate,
+        cache_dir=None,
+        use_cache=True,
+        num_workers=None,
     ):
-        """Initializes the RelationshipDataset and processes the data in parallel."""
+        """Initializes the RelationshipDataset and processes the data with optimized performance."""
         self.samples = []
         self.pos_predicate = pos_predicate.lower()
+        
+        # Create cache filename based on inputs
+        if cache_dir is not None and use_cache:
+            os.makedirs(cache_dir, exist_ok=True)
+            cache_name = f"{os.path.basename(relationships_json_path)}_{os.path.basename(image_meta_json_path)}_{pos_predicate.replace(' ', '_')}.pkl"
+            cache_path = os.path.join(cache_dir, cache_name)
+            
+            # Try loading from cache first
+            if os.path.exists(cache_path):
+                print(f"Loading cached dataset from {cache_path}")
+                with open(cache_path, 'rb') as f:
+                    self.samples = pickle.load(f)
+                    random.shuffle(self.samples)
+                    return
 
-        def chunked_json_loader(path, chunk_size=1000):
-            """Loads JSON data from a file in chunks.
-
-            Args:
-                path (str): Path to the JSON file.
-                chunk_size (int, optional): Number of items per chunk. Defaults to 1000.
-
-            Yields:
-                list: A chunk of JSON data.
-            """
-            with open(path, "r") as f:
-                data = json.load(f)
-                for i in range(0, len(data), chunk_size):
-                    yield data[i : i + chunk_size]
-
+        # If not using cache or cache doesn't exist, process data
+        print("Processing dataset from source files...")
+        
+        # Load image metadata once
         with open(image_meta_json_path, "r") as f:
             self.image_meta = {img["image_id"]: img for img in json.load(f)}
 
-        with ThreadPoolExecutor(max_workers=16) as executor:
+        # Use ProcessPoolExecutor for CPU-bound tasks instead of ThreadPoolExecutor
+        num_workers = num_workers or os.cpu_count()
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            # Load all data first (since we need image_meta in the worker processes)
+            with open(relationships_json_path, "r") as f:
+                all_data = json.load(f)
+            
+            # Calculate optimal chunk size based on data size and number of workers
+            chunk_size = max(1, len(all_data) // (num_workers * 4))
+            chunks = [all_data[i:i+chunk_size] for i in range(0, len(all_data), chunk_size)]
+            
+            # Process chunks in parallel
             futures = []
-            for chunk in chunked_json_loader(relationships_json_path):
-                futures.append(executor.submit(self.process_chunk, chunk))
+            for chunk in chunks:
+                futures.append(executor.submit(self._process_chunk_with_meta, chunk, self.image_meta, self.pos_predicate))
+            
+            # Collect results
             for future in tqdm(futures, desc="Processing chunks"):
                 chunk_samples = future.result()
                 self.samples.extend(chunk_samples)
 
         random.shuffle(self.samples)
+        
+        # Save to cache if enabled
+        if cache_dir is not None and use_cache:
+            print(f"Saving processed dataset to cache: {cache_path}")
+            with open(cache_path, 'wb') as f:
+                pickle.dump(self.samples, f)
 
-    def process_chunk(self, chunk):
-        """Processes a chunk of image relationship entries.
-
-        Args:
-            chunk (list): A list of image relationship entries.
-
-        Returns:
-            list: A list of processed samples from the chunk.
-        """
+    @staticmethod
+    def _process_chunk_with_meta(chunk, image_meta, pos_predicate):
+        """Static method for processing chunks with image metadata in parallel."""
         chunk_samples = []
         for image_entry in chunk:
-            chunk_samples.extend(self._process_image(image_entry))
+            chunk_samples.extend(RelationshipDataset._process_image_static(
+                image_entry, image_meta, pos_predicate))
         return chunk_samples
 
-    def _process_image(self, image_entry):
-        """Processes relationship data for a single image.
-
-        Args:
-            image_entry (dict): A dictionary containing image relationship data.
-
-        Returns:
-            list: A list of samples, where each sample is a tuple (subject feature, object feature, label).
-        """
+    @staticmethod
+    def _process_image_static(image_entry, image_meta, pos_predicate):
+        """Static version of _process_image for parallel processing."""
         image_id = image_entry["image_id"]
-        if image_id not in self.image_meta:
+        if image_id not in image_meta:
             return []
 
-        img_meta = self.image_meta[image_id]
+        img_meta = image_meta[image_id]
         img_width, img_height = img_meta["width"], img_meta["height"]
         object_features = {}
         positive_pairs = set()
         samples = []
 
+        # Process all relationships in the image
         for rel in image_entry.get("relationships", []):
-            subj_feat = self._extract_features(rel["subject"], img_width, img_height)
+            subj_feat = RelationshipDataset._extract_features_static(rel["subject"], img_width, img_height)
             if subj_feat is not None and "object_id" in rel["subject"]:
                 object_features[rel["subject"]["object_id"]] = subj_feat
 
-            obj_feat = self._extract_features(rel["object"], img_width, img_height)
+            obj_feat = RelationshipDataset._extract_features_static(rel["object"], img_width, img_height)
             if obj_feat is not None and "object_id" in rel["object"]:
                 object_features[rel["object"]["object_id"]] = obj_feat
 
             if subj_feat is not None and obj_feat is not None:
                 predicate = rel["predicate"].lower()
-                if predicate == self.pos_predicate:
+                if predicate == pos_predicate:
                     samples.append((subj_feat, obj_feat, torch.tensor(1.0)))
                     if "object_id" in rel["subject"] and "object_id" in rel["object"]:
                         positive_pairs.add(
                             (rel["subject"]["object_id"], rel["object"]["object_id"])
                         )
 
+        # Generate negative samples only if we have enough objects
         if len(object_features) >= 2:
+            # Create lookup dictionaries for faster access
             obj_ids = list(object_features.keys())
+            obj_id_to_idx = {obj_id: idx for idx, obj_id in enumerate(obj_ids)}
             obj_features = list(object_features.values())
+            
+            # Calculate how many negative samples to generate
             num_neg = min(len(positive_pairs), len(obj_ids) * (len(obj_ids) - 1) // 2)
+            
             if num_neg > 0:
-                indices = np.array(
-                    np.meshgrid(np.arange(len(obj_ids)), np.arange(len(obj_ids)))
-                ).T.reshape(-1, 2)
-                mask = indices[:, 0] != indices[:, 1]
-                candidate_pairs = indices[mask]
-                candidate_ids = [(obj_ids[i], obj_ids[j]) for i, j in candidate_pairs]
-                valid_mask = [pair not in positive_pairs for pair in candidate_ids]
-                valid_pairs = np.array(candidate_ids)[valid_mask]
-                if len(valid_pairs) > num_neg:
-                    selected = valid_pairs[
-                        np.random.choice(len(valid_pairs), num_neg, replace=False)
-                    ]
+                # More efficient negative sample generation
+                all_pairs = set()
+                for i in range(len(obj_ids)):
+                    for j in range(len(obj_ids)):
+                        if i != j:  # Exclude self-pairs
+                            all_pairs.add((obj_ids[i], obj_ids[j]))
+                
+                # Filter out positive pairs
+                negative_pairs = all_pairs - positive_pairs
+                
+                # Sample from negative pairs
+                negative_pairs = list(negative_pairs)
+                if len(negative_pairs) > num_neg:
+                    selected_indices = np.random.choice(len(negative_pairs), num_neg, replace=False)
+                    selected = [negative_pairs[i] for i in selected_indices]
                 else:
-                    selected = valid_pairs
+                    selected = negative_pairs
+                
+                # Create negative samples
                 for s_id, o_id in selected:
-                    s_idx = obj_ids.index(s_id)
-                    o_idx = obj_ids.index(o_id)
+                    s_idx = obj_id_to_idx[s_id]  # O(1) lookup instead of list.index()
+                    o_idx = obj_id_to_idx[o_id]
                     samples.append(
                         (obj_features[s_idx], obj_features[o_idx], torch.tensor(0.0))
                     )
+        
         return samples
 
-    def _extract_features(self, obj, img_width, img_height):
-        """Extracts normalized features from an object.
-
-        The features include normalized x, y coordinates, width, height, and a class identifier.
-
-        Args:
-            obj (dict): A dictionary representing an object with bounding box information.
-            img_width (int or float): The width of the image.
-            img_height (int or float): The height of the image.
-
-        Returns:
-            torch.Tensor: A tensor containing the extracted features, or None if the object is invalid.
-        """
+    @staticmethod
+    def _extract_features_static(obj, img_width, img_height):
+        """Static version of _extract_features for parallel processing."""
         try:
             x = obj["x"] / img_width
             y = obj["y"] / img_height
@@ -163,21 +170,8 @@ class RelationshipDataset(Dataset):
             return None
 
     def __len__(self):
-        """Returns the number of samples in the dataset.
-
-        Returns:
-            int: The total number of samples.
-        """
         return len(self.samples)
 
     def __getitem__(self, idx):
-        """Retrieves a sample by index.
-
-        Args:
-            idx (int): The index of the sample.
-
-        Returns:
-            tuple: A tuple (subject feature, object feature, label).
-        """
         subj_feat, obj_feat, label = self.samples[idx]
         return subj_feat, obj_feat, label
