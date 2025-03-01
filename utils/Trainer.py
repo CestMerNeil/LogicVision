@@ -48,6 +48,7 @@ def trainer(
     lr_factor = config["Trainer"]["lr_factor"]
     lr_patience = config["Trainer"]["lr_patience"]
     lr_min = config["Trainer"]["lr_min"]
+    patience = config["Trainer"]["patience"]
 
     train_dataset = RelationshipDataset(
         relationships_json_path=relationships_path,
@@ -86,6 +87,7 @@ def trainer(
         lr_factor=lr_factor,
         lr_patience=lr_patience,
         lr_min=lr_min,
+        patience=patience,
     )
 
 

@@ -1,0 +1,7 @@
+2025-03-02 03:21:40,612 - INFO - Starting training for predicate: near
+2025-03-02 03:21:40,617 - INFO - Total samples: 50746, Training samples: 40597, Validation samples: 10149
+2025-03-02 03:21:40,618 - INFO - Using learning rate scheduler: factor=0.8, patience=30, min_lr=1e-05
+2025-03-02 03:21:40,902 - INFO - Epoch 1/1000: Train Loss = 2.6439, Val Loss = 0.8310, Val Accuracy = 0.4842, LR = 0.001000
+2025-03-02 03:21:40,902 - INFO - Improvement detected! Best val_loss so far: 0.8310
+2025-03-02 03:21:40,905 - INFO - Saved near predicate weights to 'weights/near_predicate_weights.pth'
+2025-03-02 03:21:40,905 - INFO - Saved training log to 'logs/near_training_log_20250302_032140.json'

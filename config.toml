@@ -2,16 +2,17 @@
 # In this project, we use this TOML file for all the configurations.
 
 [Train]
-lr = 0.01
+lr = 0.001
 epochs = 1000
-batch_size = 8192
+batch_size = 2048
 
 [Trainer]
 relationships_path = "/root/autodl-tmp/relationships_full.json"
 image_meta_path = "/root/autodl-tmp/image_data_full.json"
 
+patience = 100
 lr_factor = 0.8
-lr_patience = 15
+lr_patience = 30
 lr_min = 1e-5
 
 

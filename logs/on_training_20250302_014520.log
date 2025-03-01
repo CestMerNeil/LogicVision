@@ -1,0 +1,7 @@
+2025-03-02 01:45:20,719 - INFO - Starting training for predicate: on
+2025-03-02 01:45:20,834 - INFO - Total samples: 1248632, Training samples: 998906, Validation samples: 249726
+2025-03-02 01:45:20,835 - INFO - Using learning rate scheduler: factor=0.8, patience=30, min_lr=1e-05
+2025-03-02 01:45:29,107 - INFO - Epoch 1/1000: Train Loss = 0.6762, Val Loss = 0.6325, Val Accuracy = 0.6535, LR = 0.001000
+2025-03-02 01:45:29,107 - INFO - Improvement detected! Best val_loss so far: 0.6325
+2025-03-02 01:45:29,116 - INFO - Saved on predicate weights to 'weights/on_predicate_weights.pth'
+2025-03-02 01:45:29,116 - INFO - Saved training log to 'logs/on_training_log_20250302_014520.json'
