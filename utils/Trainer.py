@@ -54,7 +54,7 @@ def trainer(
         relationships_json_path=relationships_path,
         image_meta_json_path=image_meta_path,
         pos_predicate=pos_predicate,
-        #neg_predicates=neg_predicates,
+        # neg_predicates=neg_predicates,
     )
 
     print("Length of train_dataset: ", end="")
