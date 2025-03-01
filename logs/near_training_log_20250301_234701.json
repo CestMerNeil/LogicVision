@@ -1,0 +1,1710 @@
+[
+    {
+        "epoch": 1,
+        "train_loss": 6.840557813644409,
+        "val_loss": 1.480004906654358,
+        "val_accuracy": 0.5232042565770026,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 1,
+                "best_metric": 1.480004906654358,
+                "stopped_epoch": 1
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 2,
+        "train_loss": 10.743534088134766,
+        "val_loss": 1.5510791540145874,
+        "val_accuracy": 0.5232042565770026,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 1,
+                "best_metric": 1.480004906654358,
+                "stopped_epoch": 2
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 3,
+        "train_loss": 7.9402360916137695,
+        "val_loss": 1.0535413026809692,
+        "val_accuracy": 0.47856931717410583,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 3,
+                "best_metric": 1.0535413026809692,
+                "stopped_epoch": 3
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 4,
+        "train_loss": 3.924309730529785,
+        "val_loss": 1.8761889934539795,
+        "val_accuracy": 0.47817518967385947,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 3,
+                "best_metric": 1.0535413026809692,
+                "stopped_epoch": 4
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 5,
+        "train_loss": 2.778726816177368,
+        "val_loss": 1.4676556587219238,
+        "val_accuracy": 0.47787959404867475,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 3,
+                "best_metric": 1.0535413026809692,
+                "stopped_epoch": 5
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 6,
+        "train_loss": 2.2917202711105347,
+        "val_loss": 0.7550079822540283,
+        "val_accuracy": 0.4786678490491674,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 6,
+                "best_metric": 0.7550079822540283,
+                "stopped_epoch": 6
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 7,
+        "train_loss": 1.9129548072814941,
+        "val_loss": 0.7677351832389832,
+        "val_accuracy": 0.5508917134693073,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 6,
+                "best_metric": 0.7550079822540283,
+                "stopped_epoch": 7
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 8,
+        "train_loss": 1.6791974306106567,
+        "val_loss": 0.9114329218864441,
+        "val_accuracy": 0.5348310178342693,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 6,
+                "best_metric": 0.7550079822540283,
+                "stopped_epoch": 8
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 9,
+        "train_loss": 1.550594449043274,
+        "val_loss": 0.7545669078826904,
+        "val_accuracy": 0.5367031234604395,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 6,
+                "best_metric": 0.7550079822540283,
+                "stopped_epoch": 9
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 10,
+        "train_loss": 1.3477275371551514,
+        "val_loss": 0.7015944719314575,
+        "val_accuracy": 0.4086116858803823,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 10,
+                "best_metric": 0.7015944719314575,
+                "stopped_epoch": 10
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 11,
+        "train_loss": 1.2116121649742126,
+        "val_loss": 0.6886078715324402,
+        "val_accuracy": 0.5637993891023746,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 11,
+                "best_metric": 0.6886078715324402,
+                "stopped_epoch": 11
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 12,
+        "train_loss": 1.147337019443512,
+        "val_loss": 0.6849631667137146,
+        "val_accuracy": 0.5675436003547147,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 12
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 13,
+        "train_loss": 1.0782869458198547,
+        "val_loss": 0.6894657611846924,
+        "val_accuracy": 0.5574933490984333,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 13
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 14,
+        "train_loss": 1.0208550691604614,
+        "val_loss": 0.6892439723014832,
+        "val_accuracy": 0.5455709922159818,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 14
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 15,
+        "train_loss": 0.9785075485706329,
+        "val_loss": 0.6958940029144287,
+        "val_accuracy": 0.4120603015075377,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 15
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 16,
+        "train_loss": 0.9294631481170654,
+        "val_loss": 0.7083824276924133,
+        "val_accuracy": 0.4355108877721943,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 16
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 17,
+        "train_loss": 0.9030437767505646,
+        "val_loss": 0.7028759121894836,
+        "val_accuracy": 0.44536407527835253,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 17
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 18,
+        "train_loss": 0.8825536370277405,
+        "val_loss": 0.6967740654945374,
+        "val_accuracy": 0.4338358458961474,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 18
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 19,
+        "train_loss": 0.860471248626709,
+        "val_loss": 0.6935865879058838,
+        "val_accuracy": 0.5315794659572372,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 19
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 20,
+        "train_loss": 0.8290030658245087,
+        "val_loss": 0.6915683746337891,
+        "val_accuracy": 0.5442900778401814,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 20
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 21,
+        "train_loss": 0.814190536737442,
+        "val_loss": 0.6898162961006165,
+        "val_accuracy": 0.5499063947186915,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 21
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 22,
+        "train_loss": 0.7965722978115082,
+        "val_loss": 0.6902968287467957,
+        "val_accuracy": 0.5409399940880875,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 22
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 23,
+        "train_loss": 0.788544088602066,
+        "val_loss": 0.6899139881134033,
+        "val_accuracy": 0.5371957828357473,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 23
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 24,
+        "train_loss": 0.7748270928859711,
+        "val_loss": 0.6895858645439148,
+        "val_accuracy": 0.5385752290866095,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 24
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 25,
+        "train_loss": 0.7656633257865906,
+        "val_loss": 0.6896816492080688,
+        "val_accuracy": 0.5362104640851315,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 25
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 26,
+        "train_loss": 0.7524012327194214,
+        "val_loss": 0.6899263262748718,
+        "val_accuracy": 0.5276381909547738,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 26
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 27,
+        "train_loss": 0.749277651309967,
+        "val_loss": 0.6913567781448364,
+        "val_accuracy": 0.5190659178244162,
+        "learning_rate": 0.001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 27
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.001
+            }
+        }
+    },
+    {
+        "epoch": 28,
+        "train_loss": 0.743300050497055,
+        "val_loss": 0.6919963955879211,
+        "val_accuracy": 0.5187703221992315,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 28
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 29,
+        "train_loss": 0.7416366934776306,
+        "val_loss": 0.692286491394043,
+        "val_accuracy": 0.5128584096955365,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 29
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 30,
+        "train_loss": 0.7353163361549377,
+        "val_loss": 0.6924582719802856,
+        "val_accuracy": 0.5116760271947975,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 30
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 31,
+        "train_loss": 0.7300798296928406,
+        "val_loss": 0.6925714015960693,
+        "val_accuracy": 0.507537688442211,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 31
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 32,
+        "train_loss": 0.7280749678611755,
+        "val_loss": 0.6926976442337036,
+        "val_accuracy": 0.5070450290669032,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 32
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 33,
+        "train_loss": 0.724008709192276,
+        "val_loss": 0.692854106426239,
+        "val_accuracy": 0.5100995171938122,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 33
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 34,
+        "train_loss": 0.7247414886951447,
+        "val_loss": 0.6929901838302612,
+        "val_accuracy": 0.5128584096955365,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 34
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 35,
+        "train_loss": 0.7220103144645691,
+        "val_loss": 0.6931172609329224,
+        "val_accuracy": 0.5127598778204749,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 35
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 36,
+        "train_loss": 0.7206135094165802,
+        "val_loss": 0.6931769251823425,
+        "val_accuracy": 0.5108877721943048,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 36
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 37,
+        "train_loss": 0.7206299901008606,
+        "val_loss": 0.6931431889533997,
+        "val_accuracy": 0.5100009853187506,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 37
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 38,
+        "train_loss": 0.7148010432720184,
+        "val_loss": 0.6930550932884216,
+        "val_accuracy": 0.5105921765691201,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 38
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 39,
+        "train_loss": 0.7163861989974976,
+        "val_loss": 0.6929646134376526,
+        "val_accuracy": 0.5121686865701054,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 39
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 40,
+        "train_loss": 0.7141085565090179,
+        "val_loss": 0.6928569078445435,
+        "val_accuracy": 0.513449600945906,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 40
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 41,
+        "train_loss": 0.7104935646057129,
+        "val_loss": 0.6927644610404968,
+        "val_accuracy": 0.5149275790718297,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 41
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 42,
+        "train_loss": 0.7116271257400513,
+        "val_loss": 0.6927223801612854,
+        "val_accuracy": 0.515814365947384,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 42
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 43,
+        "train_loss": 0.711897611618042,
+        "val_loss": 0.6926327347755432,
+        "val_accuracy": 0.5176864715735541,
+        "learning_rate": 0.0008
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 43
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0008
+            }
+        }
+    },
+    {
+        "epoch": 44,
+        "train_loss": 0.7077358663082123,
+        "val_loss": 0.6925406455993652,
+        "val_accuracy": 0.5210365553256479,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 44
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 45,
+        "train_loss": 0.7085689902305603,
+        "val_loss": 0.6924843192100525,
+        "val_accuracy": 0.5210365553256479,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 45
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 46,
+        "train_loss": 0.7096126973628998,
+        "val_loss": 0.692459225654602,
+        "val_accuracy": 0.5204453640752783,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 46
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 47,
+        "train_loss": 0.7082096040248871,
+        "val_loss": 0.6924548745155334,
+        "val_accuracy": 0.5220218740762637,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 47
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 48,
+        "train_loss": 0.7079101502895355,
+        "val_loss": 0.6924416422843933,
+        "val_accuracy": 0.5234013203271258,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 48
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 49,
+        "train_loss": 0.7047470211982727,
+        "val_loss": 0.6924244165420532,
+        "val_accuracy": 0.5225145334515716,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 49
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 50,
+        "train_loss": 0.7061910927295685,
+        "val_loss": 0.692400336265564,
+        "val_accuracy": 0.523105724701941,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 50
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 51,
+        "train_loss": 0.7057177424430847,
+        "val_loss": 0.6923857927322388,
+        "val_accuracy": 0.5234013203271258,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 51
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 52,
+        "train_loss": 0.7017298340797424,
+        "val_loss": 0.6923791170120239,
+        "val_accuracy": 0.5234998522021874,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 52
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 53,
+        "train_loss": 0.703376829624176,
+        "val_loss": 0.692394495010376,
+        "val_accuracy": 0.5241895753276185,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 53
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 54,
+        "train_loss": 0.7029223740100861,
+        "val_loss": 0.6924064755439758,
+        "val_accuracy": 0.5246822347029264,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 54
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 55,
+        "train_loss": 0.7018516063690186,
+        "val_loss": 0.6923919916152954,
+        "val_accuracy": 0.5252734259532958,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 55
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 56,
+        "train_loss": 0.7029018700122833,
+        "val_loss": 0.692394495010376,
+        "val_accuracy": 0.5252734259532958,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 56
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 57,
+        "train_loss": 0.7034637331962585,
+        "val_loss": 0.6923787593841553,
+        "val_accuracy": 0.5255690215784806,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 57
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 58,
+        "train_loss": 0.7037830948829651,
+        "val_loss": 0.692337691783905,
+        "val_accuracy": 0.5261602128288502,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 58
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 59,
+        "train_loss": 0.7036929130554199,
+        "val_loss": 0.6922993063926697,
+        "val_accuracy": 0.5269484678293428,
+        "learning_rate": 0.00064
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 59
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.00064
+            }
+        }
+    },
+    {
+        "epoch": 60,
+        "train_loss": 0.7016629576683044,
+        "val_loss": 0.6922721862792969,
+        "val_accuracy": 0.526652872204158,
+        "learning_rate": 0.0005120000000000001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 60
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0005120000000000001
+            }
+        }
+    },
+    {
+        "epoch": 61,
+        "train_loss": 0.7005854845046997,
+        "val_loss": 0.6922305822372437,
+        "val_accuracy": 0.5264558084540348,
+        "learning_rate": 0.0005120000000000001
+    },
+    {
+        "training_metadata": {
+            "early_stopping": {
+                "enabled": true,
+                "monitor": "val_loss",
+                "min_delta": 0.001,
+                "patience": 50,
+                "best_epoch": 12,
+                "best_metric": 0.6849631667137146,
+                "stopped_epoch": 61
+            },
+            "lr_scheduler": {
+                "enabled": true,
+                "factor": 0.8,
+                "patience": 15,
+                "min_lr": 1e-05,
+                "initial_lr": 0.001,
+                "final_lr": 0.0005120000000000001
+            }
+        }
+    }
+]

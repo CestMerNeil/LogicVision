@@ -3,15 +3,15 @@
 
 [Train]
 lr = 0.001
-epochs = 450
-batch_size = 16384
+epochs = 1000
+batch_size = 32768
 
 [Trainer]
-relationships_path = "/Volumes/T7_Shield/Datasets/relationships.json"
-image_meta_path = "/Volumes/T7_Shield/Datasets/image_data.json"
+relationships_path = "/root/autodl-tmp/relationships_full.json"
+image_meta_path = "/root/autodl-tmp/image_data_full.json"
 
 lr_factor = 0.8
-lr_patience = 10
+lr_patience = 15
 lr_min = 1e-5
 
 

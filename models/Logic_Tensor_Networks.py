@@ -185,7 +185,7 @@ class Logic_Tensor_Networks:
         lr: float,
         val_split: float = 0.2,
         early_stopping: bool = True,
-        patience: int = 80,
+        patience: int = 50,
         monitor: str = "val_loss",
         min_delta: float = 0.001,
         restore_best_weights: bool = True,
