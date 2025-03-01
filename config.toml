@@ -20,8 +20,8 @@ lr_min = 1e-5
 processor = "./cache_pretrained/models--shi-labs--oneformer_ade20k_swin_large/snapshots/4a5bac8e64f82681a12db2e151a4c2f4ce6092b2"
 model = "./cache_pretrained/models--shi-labs--oneformer_ade20k_swin_large/snapshots/4a5bac8e64f82681a12db2e151a4c2f4ce6092b2"
 cache_dir = "cache_pretrained"
-conf_threshold = 0.25
-mask_threshold = 0.25
+conf_threshold = 0.1
+mask_threshold = 0.1
 task_inputs = "panoptic"
 
 [YOLO_Extractor]
