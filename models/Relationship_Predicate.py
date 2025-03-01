@@ -242,15 +242,14 @@ class Near(ltn.Predicate):
             input_dim (int): The dimension of the input feature vector for each object.
         """
         net = nn.Sequential(
-            nn.Linear(input_dim * 2, 128),
+            nn.Linear(input_dim * 2, 256),
             nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.4),
+            nn.Dropout(0.3),
+            nn.Linear(256, 128),
+            nn.LeakyReLU(negative_slope=0.01),
             nn.Linear(128, 64),
             nn.LeakyReLU(negative_slope=0.01),
-            nn.Dropout(0.4),
-            nn.Linear(64, 32),
-            nn.LeakyReLU(negative_slope=0.01),
-            nn.Linear(32, 1),
+            nn.Linear(64, 1),
             nn.Sigmoid(),
         )
         super().__init__(model=net)
