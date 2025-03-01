@@ -2,9 +2,9 @@
 # In this project, we use this TOML file for all the configurations.
 
 [Train]
-lr = 0.001
+lr = 0.01
 epochs = 1000
-batch_size = 32768
+batch_size = 8192
 
 [Trainer]
 relationships_path = "/root/autodl-tmp/relationships_full.json"
