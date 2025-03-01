@@ -45,6 +45,10 @@ def trainer(
     relationships_path = config["Trainer"]["relationships_path"]
     image_meta_path = config["Trainer"]["image_meta_path"]
 
+    lr_factor = config["Trainer"]["lr_factor"]
+    lr_patience = config["Trainer"]["lr_patience"]
+    lr_min = ["Trainer"]["lr_min"]
+
     train_dataset = RelationshipDataset(
         relationships_json_path=relationships_path,
         image_meta_json_path=image_meta_path,
@@ -79,6 +83,9 @@ def trainer(
         epochs=epoches,
         batch_size=batch_size,
         lr=lr,
+        lr_factor=lr_factor,
+        lr_patience=lr_patience,
+        lr_min=lr_min,
     )
 
 
