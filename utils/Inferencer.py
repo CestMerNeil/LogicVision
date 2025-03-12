@@ -89,7 +89,8 @@ class Inferencer:
         """Processes all images in a folder, performs inference, and saves the results.
 
         The method iterates over all supported image files in the specified folder,
-        performs inference on each image, and saves those images where the relationship exists.
+        performs inference on each image, and saves those images where at least one
+        subject-object pair meets the relationship criteria using soft aggregation.
 
         Args:
             folder_path (str): Path to the folder containing images.
@@ -111,12 +112,18 @@ class Inferencer:
                 continue
 
             result = self.inference_single(image)
+
+            # Use the exists field which is now based on soft aggregation
             if result.get("exists", False):
                 filename = f"image_{saved_count:03d}.jpg"
-                draw_and_save_result(image, result, filename)
+                draw_and_save_result(image, result, filename, output_folder)
                 saved_count += 1
-                print(f"Saved image: {filename}")
+                print(
+                    f"Saved image: {filename} - soft score: {result.get('soft_score', 0)}"
+                )
             else:
-                print(f"No detected relationship in {image_file}.")
+                print(
+                    f"No matching relationships in {image_file} - soft score: {result.get('soft_score', 0)}"
+                )
 
         print(f"Total saved images: {saved_count}.")

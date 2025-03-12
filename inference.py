@@ -23,16 +23,29 @@ def inference():
         predicate="near",
     )
 
+    """
     print("Performing inference on a single image...")
     image_path = "/Users/neil/Code/LogicVision/images/image6.jpg"
     image = Image.open(image_path)
     result = inferencer.inference_single(image)
     if result.get("exists", True):
-        draw_and_save_result(image, result, "single_result.jpg")
+        draw_and_save_result(image, result, "single_result.jpg")"
+    """
 
     print("Performing inference on a folder of images...")
     folder_path = "/Users/neil/Code/LogicVision/images"
-    inferencer.process_folder(folder_path)
+    inferencer.process_folder(
+        folder_path=folder_path, output_folder="results/person_near_sky"
+    )
+
+    inferencer = Inferencer(
+        subj_class="person",
+        obj_class="sky",
+        predicate="ontopof",
+    )
+    inferencer.process_folder(
+        folder_path=folder_path, output_folder="results/person_ontopof_sky"
+    )
 
 
 if __name__ == "__main__":

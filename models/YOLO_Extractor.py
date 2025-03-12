@@ -122,13 +122,12 @@ if __name__ == "__main__":
     print("Initialized YOLO Extractor.")
     extractor.extractor_summary()
 
-    single_image_path = "images/image2.jpg"
+    single_image_path = "images/test.jpg"
     if not os.path.exists(single_image_path):
         raise FileNotFoundError(f"Image not found: {single_image_path}")
 
     print(f"\nTesting single image prediction for {single_image_path}...")
-    single_image_tensor = torch.rand(3, 640, 640)
-    single_output = extractor.predict(single_image_tensor)
+    single_output = extractor.predict(single_image_path)
     print("Single image prediction result keys:")
     for key, value in single_output.items():
         print(f"  {key}: {value.shape if isinstance(value, torch.Tensor) else value}")

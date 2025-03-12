@@ -464,26 +464,34 @@ class Logic_Tensor_Networks:
             logger.removeHandler(file_handler)
 
     def inference(
-        self, subj_class: str, obj_class: str, predicate: str, threshold=0.7
+        self,
+        subj_class: str,
+        obj_class: str,
+        predicate: str,
+        threshold=0.7,
+        lambda_val=10.0,
     ) -> dict:
-        """Perform inference using a predicate network.
+        """Perform inference using a predicate network with soft aggregation.
 
         Args:
             subj_class (str): Class name of the subject.
             obj_class (str): Class name of the object.
             predicate (str): Predicate to evaluate (e.g., "in", "on", "next to").
             threshold (float, optional): Confidence threshold for determining existence. Defaults to 0.7.
+            lambda_val (float, optional): Temperature parameter for soft aggregation. Higher values make aggregation more strict. Defaults to 10.0.
 
         Returns:
             dict: A dictionary containing:
                 - exists (bool): True if the relationship exists with confidence above the threshold.
                 - confidence (float): The aggregated confidence score.
+                - soft_confidence (float): Soft aggregation confidence score.
                 - message (str): Status message of the inference.
                 - subject_locations (dict): Locations of detected subject objects.
                 - object_locations (dict): Locations of detected object objects.
                 - subject_class (str): The subject class.
                 - object_class (str): The object class.
                 - predicate (str): The evaluated predicate.
+                - individual_scores (list): Scores for each subject-object pair.
         """
         try:
             subj_id = self.class_labels.index(subj_class)
@@ -549,17 +557,45 @@ class Logic_Tensor_Networks:
                 raise ValueError(f"Invalid predicate: {predicate}")
 
             preds = pred_net(subj_var_cart, obj_var_cart)
-            aggregated_score = torch.min(preds)
+
+            # Traditional min aggregation (universal quantification)
+            min_score = torch.min(preds).item()
+
+            # Soft exists implementation (using log-sum-exp for differentiable soft max)
+            # Formula: (1/λ) · log(∑ exp(λ · (Prédicat(s, o) - threshold))) > 0
+            diff = preds - threshold
+            exp_terms = torch.exp(lambda_val * diff)
+            sum_exp = torch.sum(exp_terms)
+            soft_score = (1.0 / lambda_val) * torch.log(sum_exp)
+            soft_exists = soft_score > 0
+
+            # Traditional max aggregation (existential quantification)
+            max_score = torch.max(preds).item()
+
+            # Reshape predictions to subject × object matrix for individual scores
+            individual_scores = preds.reshape(n, m).cpu().tolist()
 
             return {
-                "exists": aggregated_score.item() >= threshold,
-                "confidence": round(aggregated_score.item(), 3),
+                "exists": soft_exists.item(),  # Use soft exists as primary decision
+                "min_score": round(
+                    min_score, 3
+                ),  # Universal quantification (all pairs)
+                "max_score": round(
+                    max_score, 3
+                ),  # Existential quantification (at least one pair)
+                "soft_score": round(soft_score.item(), 3),  # Soft exists score
+                "confidence": round(
+                    soft_score.item(), 3
+                ),  # Use soft score as confidence
                 "message": "Inference successful",
                 "subject_locations": subj_locations,
                 "object_locations": obj_locations,
                 "subject_class": subj_class,
                 "object_class": obj_class,
                 "predicate": predicate,
+                "individual_scores": individual_scores,
+                "threshold": threshold,
+                "lambda": lambda_val,
             }
 
         except Exception as e:
