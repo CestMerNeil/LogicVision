@@ -122,7 +122,7 @@ if __name__ == "__main__":
     print("Initialized YOLO Extractor.")
     extractor.extractor_summary()
 
-    single_image_path = "images/test.jpg"
+    single_image_path = "images/3.jpg"
     if not os.path.exists(single_image_path):
         raise FileNotFoundError(f"Image not found: {single_image_path}")
 
